@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<!--  created with free sitemap generation system www.sitemapxml.jp  --> 
+<url>
+  <loc>https://webmark.tokyo/</loc>
+  <priority>1.0</priority>
+  <lastmod>2020-06-13T10:18:12+09:00</lastmod>
+</url>
+<url>
+  <loc>https://webmark.tokyo/index.html</loc>
+  <priority>0.8</priority>
+  <lastmod>2020-06-13T10:18:12+09:00</lastmod>
+</url>
+<url>
+  <loc>https://webmark.tokyo/php.html</loc>
+  <priority>0.8</priority>
+  <lastmod>2020-05-17T12:09:40+09:00</lastmod>
+</url>
+<url>
+  <loc>https://webmark.tokyo/ec.html</loc>
+  <priority>0.8</priority>
+  <lastmod>2020-05-17T12:10:25+09:00</lastmod>
+</url>
+<url>
+  <loc>https://webmark.tokyo/wordpress.html</loc>
+  <priority>0.8</priority>
+  <lastmod>2020-05-17T12:11:31+09:00</lastmod>
+</url>
+<url>
+  <loc>https://webmark.tokyo/others.html</loc>
+  <priority>0.8</priority>
+  <lastmod>2020-05-17T12:12:25+09:00</lastmod>
+</url>
+<url>
+  <loc>https://webmark.tokyo/music.html</loc>
+  <priority>0.8</priority>
+  <lastmod>2020-06-09T09:41:03+09:00</lastmod>
+</url>
+<url>
+  <loc>https://webmark.tokyo/books.html</loc>
+  <priority>0.8</priority>
+  <lastmod>2020-05-17T12:13:27+09:00</lastmod>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/</loc>
+  <priority>0.8</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/entry</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/mypage/favorite</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/mypage/login</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=7</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=11</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=12</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=9</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=15</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=14</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=13</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=8</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=18</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=16</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=17</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=10</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list?category_id=6</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/detail/3</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/detail/5</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/detail/4</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/detail/6</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/help/about</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/help/privacy</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/help/tradelaw</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/contact</loc>
+  <priority>0.7</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/help/agreement</loc>
+  <priority>0.6</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/forgot</loc>
+  <priority>0.6</priority>
+</url>
+<url>
+  <loc>https://webmark.tokyo/party/products/list</loc>
+  <priority>0.6</priority>
+</url>
+
+</urlset>

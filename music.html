@@ -1,0 +1,671 @@
+<!DOCTYPE HTML>
+<html lang="ja">
+
+<head>
+  <title>NIIRO MUSIC | テクノ・サイケデリックBGM制作・著作権フリー楽曲販売</title>
+  <meta charset="utf-8" />
+  <meta name="description" content="webMarkによるNIIRO MUSIC。テクノ、EPIC、PsychedelicをベースとしたBGM制作、サウンドメイキング。Audiostockでの著作権フリー楽曲販売や、映像用・生活支援用音楽のオリジナル制作を承ります。" />
+  <meta name="keywords" content="BGM制作,テクノ,サイケデリック,著作権フリー音楽,Audiostock,webMark" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    .video {
+      position: relative;
+      height: 0;
+      padding: 30px 0 56.25%;
+      overflow: hidden;
+    }
+
+    .video iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+
+  <style type="text/css">
+    @media screen and (min-width:480px) {
+
+      /* マウスストーカー */
+      #stkr {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        width: 25px;
+        height: 25px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        transition: 0.2s;
+        transition-timing-function: ease-out;
+        pointer-events: none;
+        z-index: 10000;
+      }
+
+      /* マウスストーカーに影響のない装飾CSS */
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+      }
+
+      .links div {
+        margin: 20px 10px;
+      }
+    }
+
+    .blink {
+      animation: blinking 1s ease-in-out infinite alternate;
+    }
+
+    .blink2 {
+      animation: blinking 2s ease-in-out infinite alternate;
+    }
+
+    .blink3 {
+      animation: blinking 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes blinking {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @media screen and (max-width: 767px) {
+      #footer p img {
+        display: block;
+        margin: 20px auto;
+      }
+    }
+
+    /* --- Kinetic Hex Background Style --- */
+    canvas#c {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      background-color: #000;
+    }
+
+    #page-wrapper {
+      background: transparent !important;
+    }
+
+    .wrapper.style5 {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      backdrop-filter: blur(2px);
+      z-index: 2;
+    }
+
+    #header, #footer {
+      background-color: rgba(0, 0, 0, 0.6) !important;
+      backdrop-filter: blur(5px);
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <canvas id="c"></canvas>
+
+  <style>
+    /* --- 1. 干渉遮断の強化 --- */
+    #quick-contact-wrapper,
+    #quick-contact-wrapper div,
+    #quick-contact-wrapper span,
+    #quick-contact-wrapper textarea,
+    #quick-contact-wrapper button,
+    #quick-contact-wrapper p,
+    #quick-contact-wrapper svg {
+      all: unset !important;
+      box-sizing: border-box !important;
+      font-family: sans-serif !important;
+    }
+
+    /* --- 2. ボタン本体 --- */
+    #quick-contact-wrapper #quick-contact-btn {
+      position: fixed !important;
+      right: 15px !important;
+      top: 9% !important;
+      transform: translateY(-50%) !important;
+      width: 75px !important;
+      height: 42px !important;
+      background: rgba(255, 255, 255, 0.5) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border-radius: 21px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 0 14px !important;
+      cursor: pointer !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      z-index: 2147483647 !important;
+      pointer-events: auto !important;
+    }
+
+    #quick-contact-wrapper .qcb-svg-icon {
+      display: block !important;
+      width: 22px !important;
+      height: 22px !important;
+      fill: #007bff !important;
+    }
+
+    #quick-contact-wrapper #qcb-dots-grid {
+      display: grid !important;
+      grid-template-columns: 4px 4px !important;
+      grid-gap: 3px !important;
+      width: 11px !important;
+      height: 11px !important;
+    }
+
+    #quick-contact-wrapper .qcb-dot {
+      display: block !important;
+      width: 4px !important;
+      height: 4px !important;
+      background-color: #007bff !important;
+      border-radius: 50% !important;
+    }
+
+    /* --- 3. フォーム本体 --- */
+    #quick-contact-wrapper #quick-contact-form {
+      display: none !important;
+      position: fixed !important;
+      z-index: 2147483647 !important;
+      background: rgba(0, 0, 0, 0.5) !important;
+      backdrop-filter: blur(15px) !important;
+      -webkit-backdrop-filter: blur(15px) !important;
+      border-radius: 16px !important;
+      padding: 24px !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    @media (min-width: 601px) {
+      #quick-contact-wrapper #quick-contact-form {
+        right: 100px !important;
+        top: 35% !important;
+        transform: translateY(-50%) !important;
+        width: 300px !important;
+      }
+    }
+
+    @media (max-width: 600px) {
+      #quick-contact-wrapper #quick-contact-form {
+        right: 15px !important;
+        left: 15px !important;
+        width: auto !important;
+        top: 35% !important;
+      }
+    }
+
+    #quick-contact-wrapper textarea#qc-message {
+      display: block !important;
+      width: 100% !important;
+      height: 120px !important;
+      padding: 12px !important;
+      background: rgba(255, 255, 255, 0.15) !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      border-radius: 8px !important;
+      color: #ffffff !important;
+      font-size: 16px !important;
+      margin-bottom: 10px !important;
+      outline: none !important;
+    }
+
+    #quick-contact-wrapper #qc-submit-btn {
+      display: flex !important;
+      width: 100% !important;
+      height: 45px !important;
+      background: #007bff !important;
+      color: #ffffff !important;
+      border-radius: 22px !important;
+      font-size: 16px !important;
+      font-weight: bold !important;
+      justify-content: center !important;
+      align-items: center !important;
+      cursor: pointer !important;
+    }
+
+    #quick-contact-wrapper .qc-close-label {
+      display: block !important;
+      color: #ccc !important;
+      font-size: 12px !important;
+      text-align: center !important;
+      margin-top: 10px !important;
+      cursor: pointer !important;
+    }
+  </style>
+
+  <div id="quick-contact-wrapper">
+    <div id="quick-contact-btn" onclick="toggleQCForm()">
+      <svg class="qcb-svg-icon" viewBox="0 0 24 24">
+        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+      </svg>
+      <div id="qcb-dots-grid">
+        <div class="qcb-dot"></div>
+        <div class="qcb-dot"></div>
+        <div class="qcb-dot"></div>
+        <div class="qcb-dot"></div>
+      </div>
+    </div>
+
+    <div id="quick-contact-form">
+      <textarea id="qc-message" placeholder="メッセージを入力..."></textarea>
+      <button id="qc-submit-btn" onclick="sendQuickMail()">メッセージを送信</button>
+      <p class="qc-close-label" onclick="toggleQCForm()">[ 閉じる ]</p>
+      <p id="qc-status" style="color:#fff !important; text-align:center !important; margin-top:5px !important; font-size:12px !important;"></p>
+    </div>
+  </div>
+
+  <script>
+    function toggleQCForm() {
+      const f = document.getElementById('quick-contact-form');
+      const isHidden = window.getComputedStyle(f).display === 'none';
+      f.style.setProperty('display', isHidden ? 'block' : 'none', 'important');
+    }
+
+    async function sendQuickMail() {
+      const msgInput = document.getElementById('qc-message');
+      const status = document.getElementById('qc-status');
+      const btn = document.getElementById('qc-submit-btn');
+      if (!msgInput.value) return;
+
+      status.innerText = "送信中...";
+      btn.style.pointerEvents = "none";
+      btn.style.opacity = "0.5";
+
+      const fullMessage = "【送信元: " + document.title + "】\nURL: " + window.location.href + "\n\n" + msgInput.value;
+      const url = "https://script.google.com/macros/s/AKfycbzVAp7wdsa1UXzrUStr7kkBTc1PMzBeVc-zWk2g6dvytVAafskIri2TGhwU3rCXK8-DiA/exec";
+
+      try {
+        await fetch(url, {
+          method: "POST",
+          mode: "no-cors",
+          body: JSON.stringify({
+            message: fullMessage
+          })
+        });
+        alert("送信完了。ありがとうございます");
+        msgInput.value = "";
+        status.innerText = "";
+        document.getElementById('quick-contact-form').style.setProperty('display', 'none', 'important');
+      } catch (e) {
+        status.innerText = "Error!";
+      } finally {
+        btn.style.pointerEvents = "auto";
+        btn.style.opacity = "1";
+      }
+    }
+  </script>
+
+  <div id="stkr"></div>
+  <div class="links"></div>
+
+  <script src="assets/js/jquery.min.js"></script>
+
+  <script type="text/javascript">
+    (function() {
+      const canvas = document.getElementById("c");
+      const ctx = canvas.getContext("2d");
+
+      let w, h, isMobile;
+      let frame = 0;
+      let mouse = { x: -1000, y: -1000 };
+      let hexStates = [];
+      let dots = [];
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+        isMobile = w < 600;
+        initHexGrid();
+      }
+
+      function initHexGrid() {
+        hexStates = [];
+        const r = isMobile ? 20 : 35;
+        const hexW = r * Math.sqrt(3);
+        const hexH = r * 1.5;
+        for (let y = 0; y < h + r * 2; y += hexH) {
+          let row = [];
+          let offsetX = (Math.floor(y / hexH) % 2 === 0) ? 0 : hexW / 2;
+          for (let x = 0; x < w + hexW; x += hexW) {
+            row.push({ x: x + offsetX, y: y, r: r, active: Math.random() < 0.2 });
+          }
+          hexStates.push(row);
+        }
+      }
+
+      window.addEventListener("resize", resize);
+      resize();
+
+      window.addEventListener("mousemove", e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+      window.addEventListener("touchstart", e => { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; });
+
+      class Dot {
+        constructor() {
+          this.x = Math.random() * w; this.y = Math.random() * h;
+          this.vx = (Math.random() - 0.5) * 0.8; this.vy = (Math.random() - 0.5) * 0.8;
+          this.maxSize = (2 + Math.random() * 2); this.size = 0.1;
+          this.alpha = 0; this.life = 0;
+          this.deathTime = 300 + Math.random() * 300;
+          this.isDead = false;
+        }
+        update() {
+          this.life++;
+          this.x += this.vx; this.y += this.vy;
+          if (this.x < 0 || this.x > w) this.vx *= -1;
+          if (this.y < 0 || this.y > h) this.vy *= -1;
+          this.alpha = this.life < 50 ? Math.min(1, this.alpha + 0.04) : (this.life > this.deathTime ? this.alpha * 0.95 : 1);
+          this.size += (this.maxSize - this.size) * 0.1;
+          if (this.alpha < 0.01 && this.life > this.deathTime) this.isDead = true;
+        }
+        draw() {
+          ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha * 0.4})`;
+          ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      function animate() {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, w, h);
+
+        // Draw Hex Grid
+        ctx.save();
+        ctx.lineWidth = 0.5;
+        hexStates.forEach(row => {
+          row.forEach(hex => {
+            if (frame % 40 === 0 && Math.random() < 0.02) hex.active = !hex.active;
+            ctx.beginPath();
+            for (let k = 0; k < 6; k++) {
+              const angle = (Math.PI / 3) * k + (Math.PI / 6);
+              ctx.lineTo(hex.x + hex.r * Math.cos(angle), hex.y + hex.r * Math.sin(angle));
+            }
+            ctx.closePath();
+            if (hex.active) { ctx.fillStyle = "rgba(255, 255, 255, 0.06)"; ctx.fill(); }
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.08)"; ctx.stroke();
+          });
+        });
+        ctx.restore();
+
+        // Particles
+        if (dots.length < 40 && frame % 15 === 0) dots.push(new Dot());
+        dots = dots.filter(d => { d.update(); d.draw(); return !d.isDead; });
+
+        frame++;
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    // マウスストーカー（既存）
+    const mouseStalker = "#stkr";
+    const mouseTarget = ".stkr-target";
+    const mouseStalkerArea = window;
+    const stkrSize = parseInt($(mouseStalker).css("width").replace(/px/, ""));
+    const stkrPosX = parseInt($(mouseStalker).css("left").replace(/px/, ""));
+    const stkrPosY = parseInt($(mouseStalker).css("top").replace(/px/, ""));
+    const cssPosAjust = stkrPosX + (stkrSize / 2);
+    let scale = 1;
+
+    $(mouseStalkerArea).hover(function() {
+      $(mouseStalkerArea).mousemove(function(e) {
+        let x = e.clientX - cssPosAjust;
+        let y = e.clientY - cssPosAjust;
+        $(mouseStalker).css({ "transform": "translate(" + x + "px," + y + "px) scale(" + scale + ")" });
+      });
+    });
+
+    $(mouseTarget).hover(function(e) {
+      scale = 2;
+    }, function() {
+      scale = 1;
+    });
+  </script>
+
+  <div id="bottom"></div>
+
+  <br /><br />
+  <img src="images/webmark-logo.png" alt="webMark ロゴ" width="100%" />
+
+  <div id="page-wrapper">
+
+    <header id="header">
+      <h1><span class="blink"><a href="/">webMark:(BACK)HOME</a></span></h1>
+      <nav id="nav">
+        <ul>
+          <li class="special">
+            <a href="#menu" class="menuToggle"><span class="blink"><b>MENU ▽ CLICK ON ▽</b></span></a>
+            <div id="menu">
+              <ul>
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="php.html">PHP+MySQL+javaScript</a></li>
+                <li><a href="ec.html">EC-CUBE / welcart</a></li>
+                <li><a href="wordpress.html">WORDPRESS</a></li>
+                <li><a href="others.html">OTHER(IT WORK)S</a></li>
+                <li><a href="music.html">NIIRO MUSIC</a></li>
+                <li><a href="books.html">BOOKS(Kindle)</a></li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <article id="main">
+
+      <section class="wrapper style5">
+        <div class="inner">
+
+          <section>
+            <h2>NIIRO MUSIC (Techno, EPIC, Psychedelic)</h2>
+            <p>テクノベースのBGM制作等サウンドメイキングを行なっております。<br />I'm making sound such as techno-based BGM.</p>
+
+            <header>
+              <h3>Advantages☆テクノサウンドには以下のメリットがございます</h3>
+              <p>
+                1. 各種映像との親和性の高さ High affinity with various movie images<br />
+                2. あなたの生活を邪魔せず(作業/家事/運動しながら聴く音楽)テンションを少し上げてくれる
+                <br />
+                Don't disturb your life, To support your life (music to listen to while working/housework/exercise)<br />
+                3. 制作環境の充実により安価にオリジナル楽曲が制作可能(著作権の問題) Original music can be produced inexpensively (copyright issue)<br />
+              </p>
+            </header>
+
+          </section>
+
+          <section>
+            <h4>&lt;&lt; 販売/視聴 環境 &gt;&gt;</h4>
+            <div>
+              <strong>BGM販売 / Sale as BGM :</strong><br />
+              <a href="https://audiostock.jp/bgm?utf8=%E2%9C%93&audio_search%5Bkeywords%5D=niiro&audio_category=0" target="_blank">☆AudiostockでBGM・効果音を販売中！☆</a><br />
+              <a href="https://audiostock.jp/bgm?utf8=%E2%9C%93&audio_search%5Bkeywords%5D=niiro&audio_category=0" target="_blank">
+                <img src="/banner_300_250_03.png" alt="Audiostockで著作権フリーBGM・効果音を販売中！">
+              </a>
+              <br />
+              <strong>視聴 / Listen :</strong><br />
+              <a href="https://soundcloud.com/nikitakahiro" target="_blank"><img src="/btn-connect-sc-l.png" alt="SoundCloudで視聴する"></a>
+            </div>
+          </section>
+
+          <section>
+            <h4>*これまでの実績における参考費用価格</h4>
+            <div class="table-wrapper">
+              <table class="alt">
+                <thead>
+                  <tr>
+                    <th>内容</th>
+                    <th>詳細</th>
+                    <th>価格</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Audiostock</td>
+                    <td>
+                      日本最大級の著作権フリー(二次使用可)BGM・効果音ストックサービス「Audiostock」経由の楽曲提供(WAV,MP3形式)映像制作等に仕様可。
+                      <br />
+                      Copyright free and Specifications available for video production etc.
+                    </td>
+                    <td>2,160-</td>
+                  </tr>
+                  <tr>
+                    <td>ダウンロード(DL)販売等</td>
+                    <td>
+                      DL販売対応サービス：
+                      <br />
+                      <a href="http://recochoku.jp/search/all/?q=Niiro_Epic_Psy&affiliate=" target="_blank">
+                        <img alt="レコチョク" src="/ico/icon_service_19.png">
+                      </a>
+                      &nbsp;
+                      <a href="http://mysound.jp/art/378287/" target="_blank">
+                        <img alt="mysound" src="/ico/icon_service_7.png">
+                      </a>
+                      &nbsp;
+                      <a href="https://mora.jp/search/top?keyWord=Niiro_Epic_Psy" target="_blank">
+                        <img alt="mora" src="/ico/icon_service_5.png">
+                      </a>
+
+                      <br /><br />
+
+                      <a href="http://music-book.jp/music/Artist/1059812" target="_blank">
+                        <img alt="music.jp" src="/ico/icon_service_1.png">
+                      </a>
+                      &nbsp;
+                      <a href="https://www.amazon.co.jp/s/ref=nb_sb_noss?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&url=search-alias%3Ddigital-music&field-keywords=Niiro_Epic_Psy" target="_blank">
+                        <img alt="Amazon Music" src="/ico/icon_service_3.png">
+                      </a>
+                      &nbsp;
+                      <a href="https://pc.dwango.jp/searches/all/Niiro_Epic_Psy" target="_blank">
+                        <img alt="ドワンゴジェイピー" src="/ico/icon_service_4.png">
+                      </a>
+
+                      <br />
+
+                      <a href="https://music.oricon.co.jp/php/artist/ArtistTop.php?artist=A1127272" target="_blank">
+                        <img alt="オリコンミュージックストア" src="/ico/icon_service_12.png">
+                      </a>
+                      &nbsp;
+                      <a href="https://selection.music.dmkt-sp.jp/artist/2001087668" target="_blank">
+                        <img alt="dヒッツ" src="/ico/icon_service_20.png">
+                      </a>
+                      &nbsp;
+                      <a href="https://music.youtube.com/search?q=Niiro_Epic_Psy" target="_blank">
+                        <img alt="YouTube Music" src="/ico/icon_service_35.png">
+                      </a>
+                    </td>
+                    <td>150-</td>
+                  </tr>
+                  <tr>
+                    <td>作曲/編曲</td>
+                    <td>オリジナル楽曲制作（WAV,MP3,MIDI形式対応）</td>
+                    <td>9,999 ~ </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="2"></td>
+                    <td>単位：円(JPY)</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </section>
+
+          <div style="text-align: center;">
+            <iframe width="100%" height="100" scrolling="no" frameborder="no" src="https://audiostock.jp/embed?id=783621" title="Audiostock 楽曲サンプル1"></iframe>
+            <iframe width="100%" height="100" scrolling="no" frameborder="no" src="https://audiostock.jp/embed?id=821504" title="Audiostock 楽曲サンプル2"></iframe>
+            <iframe width="100%" height="100" scrolling="no" frameborder="no" src="https://audiostock.jp/embed?id=235546" title="Audiostock 楽曲サンプル3"></iframe>
+            <iframe width="100%" height="100" scrolling="no" frameborder="no" src="https://audiostock.jp/embed?id=241925" title="Audiostock 楽曲サンプル4"></iframe>
+            <iframe width="100%" height="100" scrolling="no" frameborder="no" src="https://audiostock.jp/embed?id=247360" title="Audiostock 楽曲サンプル5"></iframe>
+            <iframe width="100%" height="100" scrolling="no" frameborder="no" src="https://audiostock.jp/embed?id=230750" title="Audiostock 楽曲サンプル6"></iframe>
+          </div>
+
+          <br /><br /><br />
+
+          <div style="text-align: center;">
+            <div class="video">
+              <iframe width="560" height="315" src="https://www.youtube.com/embed/4NwSWnnmn3U" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen title="YouTube 楽曲制作実績1"></iframe>
+            </div>
+            <br />
+            <div class="video">
+              <iframe width="560" height="315" src="https://www.youtube.com/embed/ChwWomhBCr0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen title="YouTube 楽曲制作実績2"></iframe>
+            </div>
+          </div>
+
+          <br /><br /><br />
+
+          <section>
+            <h4>これからの音楽(サウンド) / Future music(Sound)</h4>
+            <p><span class="image left"><img src="images/niiro.jpg" alt="NIIRO MUSIC イメージ画像" /></span>
+              音楽(サウンド)の世界は、制作環境の充実(各種DAW,ソフトウェア音源 / 消費側においてはストリーミング環境,検索リコメンド機能等の充実において、今後その役割も変化していく可能性を感じております。
+              そして私は映像と絡む(相乗)する音楽,生活を支援する音楽(作業/家事/運動しながら聴く音楽)制作に取り組んでおります。Now, In the world of music(sound), the production environment has been enhanced(various DAWs, software sound sources) / On the consumer side, the streaming environment, the search recommendation function, etc. will be further enhanced.So I feel that the role of music may change. I'm engaged in the production of music related to movies(synergistic) and music to support life(music to listen to while working/housework/exercise).
+            </p>
+          </section>
+
+        </div>
+      </section>
+    </article>
+
+    <footer id="footer">
+      <ul class="icons">
+        <li>
+          <span class="blink">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdeHHDxteRnScTiZ9htni38_wZpIo4Z6kpAohr5h6aITYxV7A/formResponse" target="_blank" class="icon fa-envelope-o" rel="noopener noreferrer"><span class="label">Email</span>&nbsp;<u>ご相談・お見積はこちら</u></a>
+          </span>
+        </li>&nbsp;
+        <li><a href="http://www.facebook.com/share.php?u=https://webmark.tokyo" target="_blank" class="icon fa-facebook" rel="noopener noreferrer"><span class="label">Facebook</span></a></li>
+        <li><a href="https://twitter.com/share" target="_blank" class="icon fa-twitter" rel="noopener noreferrer"><span class="label">Twitter</span></a></li>
+        <br /><br /><br />
+        <li style="color:#777c40;">◉以下ランサーズ,クラウドワークス,ココナラからもご連絡可能でございます</li>
+      </ul>
+
+      <p>
+        <a href="https://www.lancers.jp/profile/webMark" target="_blank" rel="noopener noreferrer"><img src="icon_rank_authorized.svg" class="scroll-effect" id="myImage4" alt="認定ランサー webMark" width="100px" /><img src="ls.png" class="gif-effect" alt="ランサーズ プロフィール" /></a>
+        &ensp;&ensp;
+        <a href="https://crowdworks.jp/public/employees/612901" target="_blank" rel="noopener noreferrer"><img src="pw.png" class="gif-effect" alt="プロクラウドワーカー webMark" /></a>
+      </p>
+
+      <p>
+        <a href="https://coconala.com/users/2018576" target="_blank" rel="noopener noreferrer"><img src="coco.png" class="gif-effect" alt="ココナラ webMark" width="300px" /></a>
+      </p>
+
+      <ul class="copyright">
+        <li><a href="/" style="color:#21b2a6;">&copy; WebMark. 2009-2026</a></li>
+      </ul>
+
+      <div align="right"><a href="#bottom" class="more scrolly"><img src="images/top.png" alt="ページトップへ戻る"></a></div>
+
+      <img src="images/webmark-logo.png" class="scroll-effect" id="myImage5" alt="webMark 下部ロゴ" width="100%" style="opacity:0.77;" />
+      <br /><br /><br />
+    </footer>
+
+  </div>
+
+  <script src="assets/js/jquery.scrollex.min.js"></script>
+  <script src="assets/js/jquery.scrolly.min.js"></script>
+  <script src="assets/js/skel.min.js"></script>
+  <script src="assets/js/util.js"></script>
+  <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>
