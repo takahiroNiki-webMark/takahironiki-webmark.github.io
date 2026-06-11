@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>究極のハト時計</title>
+<style>
+  body {
+    background: #f2e9d8;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Georgia', serif;
+  }
+
+  .clock {
+    width: 380px;
+    height: 480px;
+    background: #8b5a2b;
+    border-radius: 20px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    perspective: 1000px;
+    margin-bottom: 30px;
+  }
+
+  .dial {
+    width: 260px;
+    height: 260px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 180px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+  }
+
+  /* 針の中心装飾 */
+  .dial::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    background: radial-gradient(circle, #ffd700, #b8860b);
+    border: 1px solid #8b5a2b;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+  }
+
+  .number {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #5a3817;
+    padding: 5px;
+    box-sizing: border-box;
+  }
+
+  /* 針：青色に変更 */
+  .hand {
+    position: absolute;
+    width: 6px;
+    height: 100px;
+    background: #0047ab; /* ロイヤルブルー */
+    left: 50%;
+    bottom: 50%;
+    transform-origin: center bottom;
+    border-radius: 3px;
+    z-index: 10;
+  }
+  .second { background: #c0392b; width: 3px; height: 115px; }
+
+  /* 扉 */
+  .door {
+    width: 70px;
+    height: 100px;
+    background: #6e441c;
+    position: absolute;
+    top: 40px;
+    z-index: 3;
+    transition: 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    border: 1px solid #5a3817;
+  }
+  .door.left { left: 120px; transform-origin: left; border-radius: 10px 0 0 10px; }
+  .door.right { right: 120px; transform-origin: right; border-radius: 0 10px 10px 0; }
+
+  /* ハトのユニット */
+  .bird-unit {
+    position: absolute;
+    top: 55px; /* 少し下げました */
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    z-index: 2;
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center;
+  }
+
+  /* 出ている間のハトの動き（お辞儀アニメーション） */
+  @keyframes bow {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(10px) rotate(5deg); }
+  }
+
+  .bird-box { 
+    font-size: 50px; 
+    line-height: 1;
+    margin-bottom: -5px;
+  }
+  
+  /* アクティブ時のみハトを動かす */
+  .is-active .bird-box {
+    animation: bow 1.2s infinite;
+  }
+
+  .branch {
+    font-size: 24px;
+    color: #4a3c28;
+    filter: sepia(1);
+    white-space: nowrap;
+  }
+
+  .is-active .door.left { transform: rotateY(-120deg); }
+  .is-active .door.right { transform: rotateY(120deg); }
+  .is-active .bird-unit { transform: translateX(-50%) scale(1.4); top: 35px; }
+
+  /* スイッチ */
+  .switch-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #fff;
+    padding: 10px 20px;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  .switch-label { font-size: 14px; font-weight: bold; color: #8b5a2b; }
+  .toggle-switch {
+    width: 60px; height: 30px; appearance: none; background: #ccc;
+    border-radius: 20px; cursor: pointer; position: relative; transition: 0.3s;
+  }
+  .toggle-switch:checked { background: #4caf50; }
+  .toggle-switch::before {
+    content: ''; position: absolute; width: 26px; height: 26px;
+    border-radius: 50%; top: 2px; left: 2px; background: #fff; transition: 0.3s;
+  }
+  .toggle-switch:checked::before { left: 32px; }
+</style>
+</head>
+<body>
+
+<div class="clock" id="clockFrame">
+  <div class="door left"></div>
+  <div class="door right"></div>
+  
+  <div class="bird-unit">
+    <div class="bird-box">🐦</div>
+    <div class="branch">🌿━━━━</div>
+  </div>
+
+  <div class="dial" id="dial">
+    <div class="hand hour" id="hour"></div>
+    <div class="hand minute" id="minute"></div>
+    <div class="hand second" id="second"></div>
+  </div>
+</div>
+
+<div class="switch-container">
+  <span class="switch-label">SOUND OFF</span>
+  <input type="checkbox" class="toggle-switch" id="soundToggle">
+  <span class="switch-label">ON</span>
+</div>
+
+<script>
+const dial = document.getElementById('dial');
+for (let i = 1; i <= 12; i++) {
+  const numDiv = document.createElement('div');
+  numDiv.className = 'number';
+  numDiv.style.transform = `rotate(${i * 30}deg)`;
+  numDiv.innerHTML = `<span style="display:inline-block; transform:rotate(-${i * 30}deg)">${i}</span>`;
+  dial.appendChild(numDiv);
+}
+
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let isSoundEnabled = false;
+
+function singCuckoo(offset) {
+  const now = audioCtx.currentTime + offset;
+  playTone(660, now, 0.4); 
+  playTone(523, now + 0.5, 0.6);
+}
+
+function playBirdSoundTriple() {
+  if (!isSoundEnabled) return;
+  if (!audioCtx) audioCtx = new AudioContext();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  singCuckoo(0);
+  singCuckoo(1.2);
+  singCuckoo(2.4);
+}
+
+function playTone(freq, startTime, duration) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+
+document.getElementById('soundToggle').addEventListener('change', (e) => {
+  isSoundEnabled = e.target.checked;
+  if (isSoundEnabled) {
+    if (!audioCtx) audioCtx = new AudioContext();
+    audioCtx.resume();
+    playBirdSoundTriple();
+  }
+});
+
+function updateClock() {
+  const now = new Date();
+  const sec = now.getSeconds();
+  const min = now.getMinutes();
+  const hr  = now.getHours();
+
+  document.getElementById("second").style.transform = `translateX(-50%) rotate(${sec * 6}deg)`;
+  document.getElementById("minute").style.transform = `translateX(-50%) rotate(${min * 6 + sec * 0.1}deg)`;
+  document.getElementById("hour").style.transform = `translateX(-50%) rotate(${(hr % 12) * 30 + min * 0.5}deg)`;
+
+  const clockFrame = document.getElementById("clockFrame");
+
+  if (sec === 0) {
+    if (!clockFrame.classList.contains("is-active")) {
+      clockFrame.classList.add("is-active");
+      if (isSoundEnabled) playBirdSoundTriple();
+      setTimeout(() => { clockFrame.classList.remove("is-active"); }, 5500);
+    }
+  }
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+
+</body>
+</html>

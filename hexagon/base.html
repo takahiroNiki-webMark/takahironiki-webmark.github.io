@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometric Motion - Egypt Original Size</title>
+    <style>
+        /* レイアウト強制リセット */
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #0f172a;
+        }
+
+        /* 背面の六角形キャンバス */
+        #canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh; z-index: 1;
+            display: block;
+        }
+
+        /* 前面の画像コンテナ（中央配置） */
+        .overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10; pointer-events: none;
+        }
+
+        /* 画像：元のサイズを維持 */
+        .header-image {
+            width: auto;      /* 固定幅にせず、画像自体の幅に任せる */
+            max-width: 95vw;  /* 画面からはみ出さない程度に制限 */
+            height: auto;
+            opacity: 0; 
+            transform: scale(0.98);
+            animation: fadeIn 2.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to { 
+                opacity: 0.8; /* 透過率80% */
+                transform: scale(1); 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="overlay">
+        <img src="https://webmark.tokyo/images/ctx-header-egypt.png" alt="Egypt Header" class="header-image">
+    </div>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            let hexagons = [];
+            const mouse = { x: null, y: null };
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            window.addEventListener('mousemove', (e) => {
+                mouse.x = e.clientX; mouse.y = e.clientY;
+            });
+            resize();
+
+            class Hex {
+                constructor() { this.init(); }
+                init() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 15 + 10;
+                    this.vx = (Math.random() - 0.5) * 1.2;
+                    this.vy = (Math.random() - 0.5) * 1.2;
+                    this.angle = 0;
+                    this.spin = Math.random() * 0.02;
+                    this.op = 0;
+                    this.fs = Math.random() * 0.005 + 0.002;
+                    this.in = true;
+                }
+                draw() {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.globalAlpha = this.op;
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        ctx.lineTo(this.size * Math.cos(i * Math.PI / 3), this.size * Math.sin(i * Math.PI / 3));
+                    }
+                    ctx.closePath();
+                    ctx.strokeStyle = '#38bdf8';
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+                update() {
+                    this.x += this.vx; this.y += this.vy;
+                    if (this.x < -30 || this.x > canvas.width + 30) this.vx *= -1;
+                    if (this.y < -30 || this.y > canvas.height + 30) this.vy *= -1;
+                    this.angle += this.spin;
+                    if (this.in) {
+                        this.op += this.fs; if (this.op >= 0.5) this.in = false;
+                    } else {
+                        this.op -= this.fs; if (this.op <= 0) this.init();
+                    }
+                    if (mouse.x) {
+                        let dx = mouse.x - this.x, dy = mouse.y - this.y;
+                        if (Math.sqrt(dx*dx + dy*dy) < 120) { this.x -= dx * 0.03; this.y -= dy * 0.03; }
+                    }
+                }
+            }
+
+            for (let i = 0; i < 35; i++) hexagons.push(new Hex());
+            
+            function loop() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                hexagons.forEach(h => { h.update(); h.draw(); });
+                requestAnimationFrame(loop);
+            }
+            loop();
+        })();
+    </script>
+</body>
+</html>

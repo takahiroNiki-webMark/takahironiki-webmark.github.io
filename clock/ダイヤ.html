@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>WebMark Fullscreen Clock</title>
+<style>
+  :root {
+    --clock-brown: #8b5a2b;
+    --door-white: #fdfdfd;
+    --crack-color: #d1c4b9;
+    --royal-blue: #0047ab;
+    --gold: #ffd700;
+  }
+
+  /* 全画面背景 */
+  :-webkit-full-screen { background-color: #f2e9d8; }
+  :fullscreen { background-color: #f2e9d8; }
+
+  body {
+    background: #f2e9d8;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* 中央合わせに変更して上下の切れを防止 */
+    height: 100vh;
+    margin: 0;
+    font-family: 'Georgia', serif;
+    overflow: hidden;
+  }
+
+  #fullContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 垂直方向も中央へ */
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .clock-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* 分母を900に増やし、より小さな画面（横向きタブレット）でも収まるよう縮小率を強化 */
+    transform: scale(min(calc(90vw / 400), calc(95vh / 900))); 
+    transform-origin: center center;
+  }
+
+  .clock {
+    width: 380px;
+    height: 480px;
+    background: var(--clock-brown);
+    border-radius: 20px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    perspective: 1000px;
+    z-index: 10;
+  }
+
+  /* 振り子エリア：高さを少し詰め、専有面積を最適化 */
+  .pendulum-area {
+    width: 100%;
+    height: 200px; 
+    position: relative;
+    z-index: 1;
+    margin-top: -10px;
+  }
+
+  /* 共通の振り子棒スタイル */
+  .pendulum {
+    width: 4px; 
+    height: 170px;
+    background: #5a3817;
+    position: absolute; 
+    top: -10px;
+    left: 50%;
+    transform-origin: top center;
+  }
+  
+  /* 共通の卵スタイル */
+  .pendulum::after {
+    content: '';
+    position: absolute; bottom: -15px; left: 50%;
+    width: 45px; height: 60px;
+    background: var(--door-white);
+    border: 1px solid #d1c4b9;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    transform: translateX(-50%);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  /* 3本の個別設定 */
+  .p-main { 
+    z-index: 3; 
+    animation: swing-main 2s ease-in-out infinite; 
+  }
+  .p-left { 
+    z-index: 2; 
+    margin-left: -30px; 
+    height: 150px; 
+    opacity: 0.8; 
+    animation: swing-sub 1.8s ease-in-out infinite -0.5s; 
+  }
+  .p-right { 
+    z-index: 2; 
+    margin-left: 30px; 
+    height: 150px; 
+    opacity: 0.8; 
+    animation: swing-sub 2.2s ease-in-out infinite -1s; 
+  }
+
+  @keyframes swing-main {
+    0%, 100% { transform: translateX(-50%) rotate(-15deg); }
+    50% { transform: translateX(-50%) rotate(15deg); }
+  }
+  @keyframes swing-sub {
+    0%, 100% { transform: translateX(-50%) rotate(-10deg); }
+    50% { transform: translateX(-50%) rotate(20deg); }
+  }
+
+  /* 文字盤などのパーツ */
+  .dial {
+    width: 260px; height: 260px;
+    background: #fff; border-radius: 50%;
+    position: absolute; top: 180px; left: 50%;
+    transform: translateX(-50%);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+  }
+
+  .brand-logo {
+    position: absolute; top: 50px; left: 50%; transform: translateX(-50%);
+    font-size: 40px; font-weight: bold; color: #a89f91; letter-spacing: 2px;
+  }
+
+  .dial::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 16px; height: 16px; border: 1px solid #8b5a2b; border-radius: 50%;
+    background: radial-gradient(circle, var(--gold), #b8860b);
+    transform: translate(-50%, -50%); z-index: 30;
+  }
+
+  .number {
+    position: absolute; width: 100%; height: 100%;
+    text-align: center; font-size: 22px; font-weight: bold;
+    color: #5a3817; padding: 5px; box-sizing: border-box;
+  }
+
+  .hand {
+    position: absolute; width: 6px; height: 100px;
+    background: var(--royal-blue); left: 50%; bottom: 50%;
+    transform-origin: center bottom; border-radius: 4px; z-index: 20;
+  }
+  .hour { width: 10px; height: 75px; z-index: 21; }
+  .second { background: #c0392b; width: 2px; height: 115px; }
+
+  .door {
+    width: 70px; height: 110px; background: var(--door-white);
+    position: absolute; top: 35px; z-index: 5;
+    transition: 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    border: 1px solid #d1c4b9;
+  }
+  .door.left { left: 120px; transform-origin: left; border-radius: 60px 0 0 60px; clip-path: polygon(0% 0%, 100% 0%, 80% 25%, 100% 50%, 80% 75%, 100% 100%, 0% 100%); }
+  .door.right { right: 120px; transform-origin: right; border-radius: 0 60px 60px 0; clip-path: polygon(20% 25%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 20% 75%, 0% 50%); }
+
+  .bird-unit {
+    position: absolute; top: 60px; left: 50%; transform: translateX(-50%) scale(0);
+    z-index: 4; transition: transform 0.8s ease-in, top 0.8s ease-in; text-align: center;
+  }
+  .bird-box { font-size: 52px; line-height: 1; margin-bottom: -8px; }
+  .branch { font-size: 24px; color: #4a3c28; filter: sepia(0.5); white-space: nowrap; }
+
+  .is-active .door.left { transform: rotateY(-110deg); }
+  .is-active .door.right { transform: rotateY(110deg); }
+  .is-active .bird-unit { transform: translateX(-50%) scale(1.4); top: 38px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+  /* コントローラー */
+  .control-panel {
+    margin-top: 10px; /* 余白を最小限にして高さを節約 */
+    display: flex;
+    gap: 15px;
+    z-index: 100;
+  }
+
+  .btn-container {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255, 255, 255, 0.9); padding: 8px 15px;
+    border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  .toggle-switch { width: 40px; height: 22px; appearance: none; background: #ccc; border-radius: 20px; cursor: pointer; position: relative; transition: 0.3s; }
+  .toggle-switch:checked { background: #4caf50; }
+  .toggle-switch::before { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; top: 2px; left: 2px; background: #fff; transition: 0.3s; }
+  .toggle-switch:checked::before { left: 20px; }
+
+  .fullscreen-btn {
+    background: rgba(255, 255, 255, 0.9); border: none; border-radius: 50px;
+    padding: 8px 15px; font-weight: bold; color: #8b5a2b; font-size: 13px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s;
+  }
+</style>
+</head>
+<body>
+
+<div id="fullContainer">
+  <div class="clock-container">
+    <!-- 時計本体 -->
+    <div class="clock" id="clockFrame">
+      <div class="door left"></div>
+      <div class="door right"></div>
+      <div class="bird-unit">
+        <div class="bird-box">🐣</div>
+        <div class="branch">🌿━━</div>
+      </div>
+      <div class="dial" id="dial">
+        <div class="brand-logo"></div>
+        <div class="hand hour" id="hour"></div>
+        <div class="hand minute" id="minute"></div>
+        <div class="hand second" id="second"></div>
+      </div>
+    </div>
+
+    <!-- 振り子エリア：3本の卵振り子 -->
+    <div class="pendulum-area">
+      <div class="pendulum p-left"></div>
+      <div class="pendulum p-right"></div>
+      <div class="pendulum p-main"></div>
+    </div>
+    
+    <!-- コントロールパネル -->
+    <div class="control-panel">
+      <div class="btn-container">
+        <span style="font-size:10px; font-weight:bold; color:#8b5a2b;">SOUND ON</span>
+        <input type="checkbox" class="toggle-switch" id="soundToggle">
+      </div>
+      <button class="fullscreen-btn" id="fullScreenBtn">🔲 FULL SCREEN</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 数字盤
+const dial = document.getElementById('dial');
+for (let i = 1; i <= 12; i++) {
+  const numDiv = document.createElement('div');
+  numDiv.className = 'number';
+  numDiv.style.transform = `rotate(${i * 30}deg)`;
+  numDiv.innerHTML = `<span style="display:inline-block; transform:rotate(-${i * 30}deg)">${i}</span>`;
+  dial.appendChild(numDiv);
+}
+
+// サウンド
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let isSoundEnabled = false;
+
+function playTickTack(startTime, isTick) {
+  if (!isSoundEnabled || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(isTick ? 800 : 500, startTime);
+  osc.frequency.exponentialRampToValueAtTime(10, startTime + 0.05);
+  gain.gain.setValueAtTime(0.08, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.05);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(startTime); osc.stop(startTime + 0.05);
+}
+
+function singPiyo(startTime) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(2500, startTime);
+  osc.frequency.exponentialRampToValueAtTime(3000, startTime + 0.05);
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(0.2, startTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(startTime); osc.stop(startTime + 0.15);
+}
+
+function playBirdSoundTriple() {
+  if (!isSoundEnabled || !audioCtx) return;
+  const now = audioCtx.currentTime;
+  for(let i = 0; i < 3; i++) {
+    const start = now + (i * 1.5);
+    for(let j = 0; j < 2; j++) singPiyo(start + (j * 0.2));
+  }
+}
+
+document.getElementById('soundToggle').addEventListener('change', (e) => {
+  isSoundEnabled = e.target.checked;
+  if (isSoundEnabled && !audioCtx) audioCtx = new AudioContext();
+  if (audioCtx) audioCtx.resume();
+});
+
+const fullBtn = document.getElementById('fullScreenBtn');
+fullBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.getElementById('fullContainer').requestFullscreen().catch(() => {});
+    fullBtn.textContent = "🔚 EXIT FULL";
+  } else {
+    document.exitFullscreen();
+    fullBtn.textContent = "🔲 FULL SCREEN";
+  }
+});
+
+let lastTickSec = -1;
+function updateClock() {
+  const now = new Date();
+  const ms = now.getMilliseconds();
+  const sec = now.getSeconds();
+  if (sec !== lastTickSec) {
+    if (isSoundEnabled) playTickTack(audioCtx.currentTime, sec % 2 === 0);
+    lastTickSec = sec;
+  }
+  document.getElementById("second").style.transform = `translateX(-50%) rotate(${(sec * 6) + (ms * 0.006)}deg)`;
+  document.getElementById("minute").style.transform = `translateX(-50%) rotate(${(now.getMinutes() * 6) + (sec * 0.1)}deg)`;
+  document.getElementById("hour").style.transform = `translateX(-50%) rotate(${((now.getHours() % 12) * 30) + (now.getMinutes() * 0.5)}deg)`;
+
+  const frame = document.getElementById("clockFrame");
+  if (sec === 0 && ms < 50 && !frame.classList.contains("is-active")) {
+    frame.classList.add("is-active");
+    playBirdSoundTriple();
+    setTimeout(() => frame.classList.remove("is-active"), 5500);
+  }
+  requestAnimationFrame(updateClock);
+}
+updateClock();
+</script>
+</body>
+</html>

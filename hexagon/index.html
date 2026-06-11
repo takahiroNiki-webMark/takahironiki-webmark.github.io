@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>webMark. - Dynamic & Functional</title>
+<style>
+html, body {
+    margin: 0; padding: 0; width: 100%; height: auto;
+    /* 初期背景色 */
+    background-color: rgb(15, 23, 42); 
+    color: #ffffff;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    /* 背景色変化を滑らかにする */
+    transition: background-color 0.8s ease-out;
+}
+
+#canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100vw; height: 100vh; z-index: 0;
+    display: block; pointer-events: none;
+}
+
+.header {
+    position: fixed; top: 0; left: 0; width: 100%;
+    height: 70px; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 5%;
+    box-sizing: border-box; z-index: 1000;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.header-logo {
+    font-size: 1.5rem; font-weight: 200; letter-spacing: 0.2rem;
+    color: #38bdf8; text-decoration: none;
+}
+
+.nav-menu { display: flex; list-style: none; gap: 30px; }
+.nav-menu a {
+    text-decoration: none; color: #ffffff; font-size: 0.9rem;
+    letter-spacing: 0.1rem; opacity: 0.7; transition: 0.3s;
+}
+.nav-menu a:hover { opacity: 1; color: #38bdf8; }
+
+.hamburger {
+    display: none; cursor: pointer; z-index: 1001;
+    width: 30px; height: 20px; position: relative;
+}
+.hamburger span {
+    display: block; width: 100%; height: 2px;
+    background: #38bdf8; position: absolute; transition: 0.3s;
+}
+.hamburger span:nth-child(1) { top: 0; }
+.hamburger span:nth-child(2) { top: 9px; }
+.hamburger span:nth-child(3) { top: 18px; }
+.hamburger.active span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+
+.sp-nav {
+    position: fixed; top: 0; right: -100%; width: 80%; height: 100vh;
+    background: rgba(15, 23, 42, 0.25);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 40px; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+.sp-nav.active { right: 0; }
+.sp-nav a { font-size: 1.5rem; text-decoration: none; color: #ffffff; font-weight: 200; letter-spacing: 0.2rem; }
+.sp-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    background: none;
+    border: none;
+    font-size: 2.5rem;
+    color: #38bdf8;
+    cursor: pointer;
+    z-index: 1002;
+}
+
+#back-to-top {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    width: 50px;
+    height: 50px;
+    background: rgba(56, 189, 248, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 50%;
+    color: #38bdf8;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+#back-to-top:hover {
+    background: rgba(56, 189, 248, 0.4);
+    transform: scale(1.1);
+}
+
+.hero-section { height: 100vh; display: flex; justify-content: center; align-items: center; }
+
+.hero-fade {
+    opacity: 0;
+    filter: blur(20px);
+    transform: translateY(30px);
+    transition: opacity 2.5s ease, filter 2.5s ease, transform 2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero-fade.loaded {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+}
+
+.content-section { padding: 80px 0; display: flex; justify-content: center; }
+.container { display: flex; width: 85%; max-width: 1000px; gap: 60px; align-items: center; }
+.reverse { flex-direction: row-reverse; }
+
+.reveal { opacity: 0; filter: blur(15px); transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-left { transform: translateX(-60px) scale(0.9); }
+.reveal-right { transform: translateX(60px) scale(0.9); }
+.active .reveal { opacity: 1; filter: blur(0); transform: translateX(0) scale(1); }
+
+.item-image { flex: 1; max-width: 400px; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.item-text { flex: 1; }
+.item-text h2 { color: #38bdf8; margin-bottom: 15px; }
+
+/* --- CONTACT SECTION --- */
+.contact-section {
+    padding: 100px 0;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+}
+.contact-container {
+    width: 90%;
+    max-width: 700px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 60px 40px;
+    border-radius: 20px;
+    text-align: center;
+}
+.contact-section h2 {
+    color: #38bdf8;
+    font-weight: 200;
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    letter-spacing: 0.3rem;
+}
+.form-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+.form-group label {
+    display: block;
+    font-size: 0.8rem;
+    color: #38bdf8;
+    margin-bottom: 8px;
+    letter-spacing: 0.1rem;
+}
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 15px;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    color: #fff;
+    font-size: 1rem;
+    transition: 0.3s;
+    outline: none;
+    box-sizing: border-box;
+}
+.form-group input:focus, .form-group textarea:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+.submit-btn {
+    background: transparent;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    padding: 15px 50px;
+    font-size: 1rem;
+    letter-spacing: 0.2rem;
+    cursor: pointer;
+    transition: 0.4s;
+    margin-top: 20px;
+}
+.submit-btn:hover {
+    background: #38bdf8;
+    color: #0f172a;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+}
+
+/* --- 装飾 --- */
+.footer-pre-spacer {
+    height: 300px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.footer-decoration {
+    width: 100%; max-width: 1200px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.5), transparent);
+    position: relative;
+}
+.footer-decoration::before, .footer-decoration::after {
+    content: ''; position: absolute; width: 150px; height: 1px; background: rgba(56, 189, 248, 0.3); top: 0;
+}
+.footer-decoration::before { left: 20%; transform: rotate(45deg); transform-origin: left; }
+.footer-decoration::after { right: 20%; transform: rotate(-45deg); transform-origin: right; }
+.footer-dot {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 6px; height: 6px; background: #38bdf8; border-radius: 50%;
+    box-shadow: 0 0 15px #38bdf8, 0 0 30px #38bdf8;
+    animation: pulse 3s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+}
+
+.footer {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    color: #ffffff;
+    text-align: center;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    z-index: 10;
+}
+.footer h2 { color: #38bdf8; font-weight: 200; font-size: 2rem; margin: 0; }
+.footer p { font-size: 0.9rem; opacity: 0.7; margin: 0; }
+.footer .footer-links { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+.footer .footer-links a { text-decoration: none; color: #ffffff; opacity: 0.7; transition: 0.3s; }
+.footer .footer-links a:hover { opacity: 1; color: #38bdf8; }
+
+.footer-bottom-spacer {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .nav-menu { display: none; }
+    .hamburger { display: block; }
+    .container, .reverse { flex-direction: column !important; text-align: center; }
+    #back-to-top { right: 20px; bottom: 20px; width: 45px; height: 45px; }
+
+    .footer-pre-spacer { height: 150px; }
+    .contact-container { padding: 40px 20px; width: 85%; }
+    .contact-section h2 { font-size: 1.8rem; }
+
+    .concept-item {
+        opacity: 0; transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .concept-item.show { opacity: 1; transform: translateY(0); }
+    .footer { padding: 40px 20px; }
+
+    .footer-bottom-spacer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 100px;
+        padding-bottom: 120px;
+        position: relative;
+        background: rgba(15, 23, 42, 0.85);
+    }
+    
+    .sp-final-mark {
+        width: 40px;
+        height: 40px;
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        position: relative;
+        transform: rotate(45deg);
+        opacity: 0.5;
+    }
+    
+    .sp-final-mark::after {
+        content: '';
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 1px; height: 80px;
+        background: linear-gradient(to bottom, #38bdf8, transparent);
+        transform: translate(-50%, 0) rotate(-45deg);
+    }
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="back-to-top">▲</div>
+
+<header class="header">
+    <a href="#" class="header-logo">webMark.</a>
+    <ul class="nav-menu">
+        <li><a href="#concept">CONCEPT</a></li>
+        <li><a href="#design">DESIGN</a></li>
+        <li><a href="#vision">VISION</a></li>
+        <li><a href="#contact">CONTACT</a></li>
+    </ul>
+    <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</header>
+
+<nav class="sp-nav" id="sp-nav">
+    <button class="sp-close" id="sp-close">×</button>
+    <a href="#concept">CONCEPT</a>
+    <a href="#design">DESIGN</a>
+    <a href="#vision">VISION</a>
+    <a href="#contact">CONTACT</a>
+</nav>
+
+<section class="hero-section">
+    <div class="hero-content hero-fade" id="hero-content" style="text-align: center;">
+        <img src="https://webmark.tokyo/images/ctx-header-egypt.png" alt="Egypt" style="width: auto; max-width: 90vw; opacity: 0.8;">
+        <h1 style="font-size: 3.5rem; font-weight: 200; margin-top: 20px;">webMark.</h1>
+    </div>
+</section>
+
+<section class="content-section" id="concept">
+    <div class="container reveal-box concept-item">
+        <img src="https://webmark.tokyo/images/ctx-header-egypt.png" class="item-image reveal reveal-left" alt="01">
+        <div class="item-text reveal">
+            <h2>Concept 01</h2>
+            <p>メニュー背景の透明度を上げ、背後の六角形がより鮮明に透けるようにしました。SP環境でも躍動感を損ないません。</p>
+        </div>
+    </div>
+</section>
+
+<section class="content-section" id="design">
+    <div class="container reverse reveal-box concept-item">
+        <img src="https://webmark.tokyo/images/ctx-header-egypt.png" class="item-image reveal reveal-right" alt="02">
+        <div class="item-text reveal">
+            <h2>Design 02</h2>
+            <p>75%透過（Alpha 0.25）に設定されたメニューは、グラスモーフィズムと相まって、極めてモダンな印象を与えます。</p>
+        </div>
+    </div>
+</section>
+
+<section class="contact-section reveal-box" id="contact">
+    <div class="contact-container reveal">
+        <h2>CONTACT</h2>
+        <form action="#">
+            <div class="form-group">
+                <label for="name">NAME</label>
+                <input type="text" id="name" name="name" placeholder="Your Name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">EMAIL</label>
+                <input type="email" id="email" name="email" placeholder="email@example.com" required>
+            </div>
+            <div class="form-group">
+                <label for="message">MESSAGE</label>
+                <textarea id="message" name="message" rows="5" placeholder="How can we help you?" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">SEND MESSAGE</button>
+        </form>
+    </div>
+</section>
+
+<div class="footer-pre-spacer">
+    <div class="footer-decoration">
+        <div class="footer-dot"></div>
+    </div>
+</div>
+
+<footer class="footer">
+    <h2>webMark.</h2>
+    <p>© 2026 webMark. All Rights Reserved.</p>
+    <div class="footer-links">
+        <a href="#concept">CONCEPT</a>
+        <a href="#design">DESIGN</a>
+        <a href="#vision">VISION</a>
+        <a href="#contact">CONTACT</a>
+    </div>
+</footer>
+
+<div class="footer-bottom-spacer">
+    <div class="sp-final-mark"></div>
+</div>
+
+<script>
+(function() {
+    const hamburger = document.getElementById('hamburger');
+    const spNav = document.getElementById('sp-nav');
+    const spClose = document.getElementById('sp-close');
+    const backToTop = document.getElementById('back-to-top');
+    const heroContent = document.getElementById('hero-content');
+
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            heroContent.classList.add('loaded');
+        }, 300);
+    });
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        spNav.classList.toggle('active');
+    });
+
+    spNav.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            spNav.classList.remove('active');
+        });
+    });
+
+    spClose.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        spNav.classList.remove('active');
+    });
+
+    window.addEventListener('scroll', () => {
+        // バックトゥトップボタンの表示制御
+        if (window.scrollY > 300) {
+            backToTop.classList.add('show');
+        } else {
+            backToTop.classList.remove('show');
+        }
+
+        // 背景色の動的変化
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = window.scrollY / scrollHeight;
+        
+        // 色の定義 (RGB)
+        // 開始色: #0f172a (15, 23, 42) - 濃い紺
+        // 終了色: #1e1b4b (30, 27, 75) - やや明るい紫紺
+        const startColor = [15, 23, 42];
+        const endColor = [30, 27, 75];
+
+        const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * scrollPercent);
+        const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * scrollPercent);
+        const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * scrollPercent);
+
+        document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+    });
+
+    backToTop.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add("active"); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll(".reveal-box").forEach(box => observer.observe(box));
+
+    if(window.innerWidth <= 768){
+        const spItems = document.querySelectorAll(".concept-item");
+        const spObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting){ entry.target.classList.add("show"); }
+            });
+        }, { threshold: 0.2 });
+        spItems.forEach(item => spObserver.observe(item));
+    }
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let hexagons = [], scrollVelocity = 0, lastScrollY = window.scrollY;
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize);
+    window.addEventListener('scroll', () => {
+        let current = window.scrollY;
+        scrollVelocity = Math.abs(current - lastScrollY);
+        lastScrollY = current;
+    });
+    resize();
+
+    class Hex {
+        constructor() { this.init(); }
+        init() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 15 + 10;
+            this.vx = (Math.random() - 0.5) * 1.2;
+            this.vy = (Math.random() - 0.5) * 1.2;
+            this.angle = 0; this.spin = Math.random() * 0.02;
+            this.op = 0; this.fs = Math.random() * 0.005 + 0.002; this.in = true;
+        }
+        update() {
+            const boost = 1 + (scrollVelocity * 0.05);
+            this.x += this.vx * boost; this.y += this.vy * boost;
+            this.angle += this.spin;
+            if(this.in){ this.op += this.fs; if(this.op >= 0.5) this.in=false; }
+            else { this.op -= this.fs; if(this.op <= 0) this.init(); }
+            scrollVelocity *= 0.95;
+        }
+        draw() {
+            ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
+            ctx.globalAlpha = this.op; ctx.beginPath();
+            for(let i=0;i<6;i++) ctx.lineTo(this.size*Math.cos(i*Math.PI/3), this.size*Math.sin(i*Math.PI/3));
+            ctx.closePath(); ctx.strokeStyle='#38bdf8'; ctx.stroke(); ctx.restore();
+        }
+    }
+    for(let i=0;i<35;i++) hexagons.push(new Hex());
+    function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); hexagons.forEach(h=>{h.update();h.draw();}); requestAnimationFrame(loop);}
+    loop();
+})();
+</script>
+
+</body>
+</html>

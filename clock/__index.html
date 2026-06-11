@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>WebMark Fullscreen Clock</title>
+<style>
+  :root {
+    --clock-brown: #8b5a2b;
+    --door-brown: #6e441c;
+    --royal-blue: #0047ab;
+    --gold: #ffd700;
+  }
+
+  /* 全画面時でも背景色を維持 */
+  :-webkit-full-screen { background-color: #f2e9d8; }
+  :-ms-fullscreen { background-color: #f2e9d8; }
+  :fullscreen { background-color: #f2e9d8; }
+
+  body {
+    background: #f2e9d8;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Georgia', serif;
+    overflow: hidden;
+  }
+
+  /* 全画面対象のコンテナ */
+  #fullContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background: #f2e9d8;
+  }
+
+  .clock-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: scale(1); /* 全画面時に調整可能 */
+  }
+
+  .clock {
+    width: 380px;
+    height: 480px;
+    background: var(--clock-brown);
+    border-radius: 20px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    perspective: 1000px;
+    z-index: 10;
+  }
+
+  .dial {
+    width: 260px;
+    height: 260px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 180px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+  }
+
+  .brand-logo {
+    position: absolute;
+    top: 65px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    color: #a89f91;
+    letter-spacing: 2px;
+  }
+
+  .dial::after {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    width: 16px; height: 16px;
+    background: radial-gradient(circle, var(--gold), #b8860b);
+    border: 1px solid #8b5a2b;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 30;
+  }
+
+  .number {
+    position: absolute; width: 100%; height: 100%;
+    text-align: center; font-size: 22px; font-weight: bold;
+    color: #5a3817; padding: 5px; box-sizing: border-box;
+  }
+
+  .hand {
+    position: absolute; width: 6px; height: 100px;
+    background: var(--royal-blue);
+    left: 50%; bottom: 50%;
+    transform-origin: center bottom;
+    border-radius: 4px; z-index: 20;
+  }
+  .second { background: #c0392b; width: 2px; height: 115px; }
+
+  .door {
+    width: 70px; height: 100px;
+    background: var(--door-brown);
+    position: absolute; top: 40px; z-index: 5;
+    transition: 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    border: 1px solid #5a3817;
+  }
+  .door.left { left: 120px; transform-origin: left; border-radius: 10px 0 0 10px; }
+  .door.right { right: 120px; transform-origin: right; border-radius: 0 10px 10px 0; }
+
+  .bird-unit {
+    position: absolute; top: 60px; left: 50%;
+    transform: translateX(-50%) scale(0);
+    z-index: 4;
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center;
+  }
+
+  @keyframes bird-sing {
+    0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+    50% { transform: translateY(12px) rotate(5deg) scale(1.1); }
+  }
+
+  .bird-box { font-size: 52px; line-height: 1; margin-bottom: -8px; }
+  .is-active .bird-box { animation: bird-sing 1.2s infinite; }
+  .branch { font-size: 24px; color: #4a3c28; filter: sepia(0.5); white-space: nowrap; }
+
+  .is-active .door.left { transform: rotateY(-120deg); }
+  .is-active .door.right { transform: rotateY(120deg); }
+  .is-active .bird-unit { transform: translateX(-50%) scale(1.4); top: 38px; }
+
+  .pendulum {
+    width: 4px; height: 160px;
+    background: #5a3817;
+    position: absolute; top: 450px; left: 50%;
+    transform-origin: top center;
+    animation: swing 2s ease-in-out infinite;
+    z-index: 5;
+  }
+  .pendulum::after {
+    content: '';
+    position: absolute; bottom: 0; left: 50%;
+    width: 45px; height: 45px;
+    background: radial-gradient(circle, var(--gold), #b8860b);
+    border-radius: 50%; transform: translateX(-50%);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  @keyframes swing {
+    0%, 100% { transform: translateX(-50%) rotate(-15deg); }
+    50% { transform: translateX(-50%) rotate(15deg); }
+  }
+
+  /* 操作パネル */
+  .control-panel {
+    margin-top: 180px;
+    display: flex;
+    gap: 20px;
+    z-index: 100;
+  }
+
+  .btn-container {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; padding: 10px 20px;
+    border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  .toggle-switch { width: 50px; height: 26px; appearance: none; background: #ccc; border-radius: 20px; cursor: pointer; position: relative; transition: 0.3s; }
+  .toggle-switch:checked { background: #4caf50; }
+  .toggle-switch::before { content: ''; position: absolute; width: 22px; height: 22px; border-radius: 50%; top: 2px; left: 2px; background: #fff; transition: 0.3s; }
+  .toggle-switch:checked::before { left: 26px; }
+
+  .fullscreen-btn {
+    background: #fff; border: none; border-radius: 50px;
+    padding: 10px 20px; font-weight: bold; color: #8b5a2b;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    cursor: pointer; transition: 0.3s;
+  }
+  .fullscreen-btn:hover { background: #f0f0f0; transform: translateY(-2px); }
+</style>
+</head>
+<body>
+
+<div id="fullContainer">
+  <div class="clock-container">
+    <div class="clock" id="clockFrame">
+      <div class="door left"></div>
+      <div class="door right"></div>
+      
+      <div class="bird-unit">
+        <div class="bird-box">🐦</div>
+        <div class="branch">🌿━━━━</div>
+      </div>
+
+      <div class="dial" id="dial">
+        <div class="brand-logo"></div>
+        <div class="hand hour" id="hour"></div>
+        <div class="hand minute" id="minute"></div>
+        <div class="hand second" id="second"></div>
+      </div>
+    </div>
+    <div class="pendulum"></div>
+  </div>
+
+  <div class="control-panel">
+    <!-- サウンドスイッチ -->
+    <div class="btn-container">
+      <span style="font-size:12px; font-weight:bold; color:#8b5a2b;">SOUND ON</span>
+      <input type="checkbox" class="toggle-switch" id="soundToggle">
+    </div>
+
+    <!-- 全画面スイッチ -->
+    <button class="fullscreen-btn" id="fullScreenBtn">🔲 FULL SCREEN</button>
+  </div>
+</div>
+
+<script>
+// 文字盤の数字生成
+const dial = document.getElementById('dial');
+for (let i = 1; i <= 12; i++) {
+  const numDiv = document.createElement('div');
+  numDiv.className = 'number';
+  numDiv.style.transform = `rotate(${i * 30}deg)`;
+  numDiv.innerHTML = `<span style="display:inline-block; transform:rotate(-${i * 30}deg)">${i}</span>`;
+  dial.appendChild(numDiv);
+}
+
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let isSoundEnabled = false;
+
+function singCuckoo(offset) {
+  const now = audioCtx.currentTime + offset;
+  playTone(660, now, 0.4); 
+  playTone(523, now + 0.5, 0.6);
+}
+
+function playBirdSoundTriple() {
+  if (!isSoundEnabled) return;
+  if (!audioCtx) audioCtx = new AudioContext();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  singCuckoo(0); singCuckoo(1.2); singCuckoo(2.4);
+}
+
+function playTone(freq, startTime, duration) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(startTime); osc.stop(startTime + duration);
+}
+
+// サウンド切り替え
+document.getElementById('soundToggle').addEventListener('change', (e) => {
+  isSoundEnabled = e.target.checked;
+  if (isSoundEnabled) {
+    if (!audioCtx) audioCtx = new AudioContext();
+    audioCtx.resume();
+    playBirdSoundTriple();
+  }
+});
+
+// 全画面切り替え
+const fullBtn = document.getElementById('fullScreenBtn');
+fullBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.getElementById('fullContainer').requestFullscreen().catch(err => {
+      alert(`全画面表示に失敗しました: ${err.message}`);
+    });
+    fullBtn.textContent = "🔚 EXIT FULL";
+  } else {
+    document.exitFullscreen();
+    fullBtn.textContent = "🔲 FULL SCREEN";
+  }
+});
+
+function updateClock() {
+  const now = new Date();
+  const ms = now.getMilliseconds();
+  const sec = now.getSeconds();
+  const min = now.getMinutes();
+  const hr  = now.getHours();
+
+  const secDeg = (sec * 6) + (ms * 0.006);
+  const minDeg = (min * 6) + (sec * 0.1);
+  const hrDeg  = ((hr % 12) * 30) + (min * 0.5);
+
+  document.getElementById("second").style.transform = `translateX(-50%) rotate(${secDeg}deg)`;
+  document.getElementById("minute").style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
+  document.getElementById("hour").style.transform = `translateX(-50%) rotate(${hrDeg}deg)`;
+
+  const clockFrame = document.getElementById("clockFrame");
+  if (sec === 0 && ms < 50) {
+    if (!clockFrame.classList.contains("is-active")) {
+      clockFrame.classList.add("is-active");
+      if (isSoundEnabled) playBirdSoundTriple();
+      setTimeout(() => { clockFrame.classList.remove("is-active"); }, 5500);
+    }
+  }
+  requestAnimationFrame(updateClock);
+}
+
+updateClock();
+</script>
+
+</body>
+</html>

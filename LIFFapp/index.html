@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFFアプリ☆webMark.</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { 
+            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            text-align: center; 
+            padding-top: 50px; 
+            background-color: #f8f9fa; 
+            color: #333;
+        }
+        .container {
+            background: white; 
+            margin: 0 auto; 
+            padding: 30px; 
+            border-radius: 20px; 
+            width: 85%; 
+            max-width: 350px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+        #profile { display: none; }
+        #picture { 
+            width: 120px; 
+            height: 120px; 
+            border-radius: 50%; 
+            border: 4px solid #06C755;
+            margin-bottom: 15px;
+        }
+        h2 { color: #06C755; font-size: 1.2rem; margin-bottom: 20px; }
+        .user-name { font-size: 1.4rem; font-weight: bold; }
+        .btn { 
+            background-color: #06C755; 
+            color: white; 
+            border: none; 
+            padding: 12px 25px; 
+            border-radius: 30px; 
+            cursor: pointer; 
+            margin-top: 25px;
+            font-weight: bold;
+            width: 100%;
+        }
+        #status { font-size: 0.9rem; color: #888; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>LINE連携 成功しています↓</h2>
+        
+        <div id="profile">
+            <img id="picture" src="" alt="プロフィール画像"><br>
+            <p>ようこそ、<br><span class="user-name" id="name"></span> さん</p>
+            <button class="btn" onclick="liff.closeWindow()">LINEに(トーク)戻る</button>
+        </div>
+
+
+<div style="padding-top:20px;">
+<a href="https://kingsilver.webmark.tokyo/">
+<button class="btn">ec-cube連携(LINE上で開く)</button>
+</a>
+</div>
+
+
+        <p id="status">LINEから情報を取得中...</p>
+    </div>
+
+    <script>
+        async function initializeLiff() {
+            try {
+                // 発行されたIDで初期化
+                await liff.init({ liffId: "2009781205-Hm6pDI9Z" });
+
+                if (!liff.isLoggedIn()) {
+                    // ログインしていない場合はLINEログイン画面へ
+                    liff.login();
+                } else {
+                    // プロフィール情報の取得
+                    const profile = await liff.getProfile();
+                    
+                    // 画面表示の切り替え
+                    document.getElementById('status').style.display = 'none';
+                    document.getElementById('profile').style.display = 'block';
+                    document.getElementById('name').textContent = profile.displayName;
+                    document.getElementById('picture').src = profile.pictureUrl;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('status').innerHTML = 
+                    '<span style="color:red;">エラーが発生しました</span><br><small>' + err + '</small>';
+            }
+        }
+
+        initializeLiff();
+    </script>
+</body>
+</html>

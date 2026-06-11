@@ -1,0 +1,538 @@
+<!DOCTYPE HTML>
+<!--
+	Spectral by HTML5 UP
+	html5up.net | @n33co
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+  <title>EC-CUBE(2/3/4系)</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+  <!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+
+
+  <style type="text/css">
+    @media screen and (min-width:480px) {
+
+      /* マウスストーカー */
+      #stkr {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        width: 25px;
+        height: 25px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        transition: 0.2s;
+        transition-timing-function: ease-out;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      /* マウスストーカーに影響のない装飾CSS */
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+      }
+
+      .links div {
+        margin: 20px 10px;
+      }
+    }
+
+
+    .blink {
+      animation: blinking 1s ease-in-out infinite alternate;
+    }
+
+    .blink2 {
+      animation: blinking 2s ease-in-out infinite alternate;
+    }
+
+    .blink3 {
+      animation: blinking 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes blinking {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @media screen and (max-width: 767px) {
+
+      #footer p img {
+        display: block;
+        /* 縦並びを前提にする */
+        margin: 20px auto;
+        /* 上下余白を増やす（←ここがポイント） */
+      }
+
+    }
+  </style>
+
+</head>
+
+<body>
+
+
+
+
+
+  <style>
+    /* --- 1. 干渉遮断の強化 --- */
+    #quick-contact-wrapper,
+    #quick-contact-wrapper div,
+    #quick-contact-wrapper span,
+    #quick-contact-wrapper textarea,
+    #quick-contact-wrapper button,
+    #quick-contact-wrapper p,
+    #quick-contact-wrapper svg {
+      all: unset !important;
+      box-sizing: border-box !important;
+      font-family: sans-serif !important;
+    }
+
+    /* --- 2. ボタン本体 --- */
+    #quick-contact-wrapper #quick-contact-btn {
+      position: fixed !important;
+      right: 15px !important;
+      top: 9% !important;
+      transform: translateY(-50%) !important;
+      width: 75px !important;
+      height: 42px !important;
+      background: rgba(255, 255, 255, 0.5) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border-radius: 21px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 0 14px !important;
+      cursor: pointer !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      z-index: 2147483647 !important;
+      pointer-events: auto !important;
+    }
+
+    /* SVGアイコンのサイズと色を固定 */
+    #quick-contact-wrapper .qcb-svg-icon {
+      display: block !important;
+      width: 22px !important;
+      height: 22px !important;
+      fill: #007bff !important;
+      /* 青色 */
+    }
+
+    #quick-contact-wrapper #qcb-dots-grid {
+      display: grid !important;
+      grid-template-columns: 4px 4px !important;
+      grid-gap: 3px !important;
+      width: 11px !important;
+      height: 11px !important;
+    }
+
+    #quick-contact-wrapper .qcb-dot {
+      display: block !important;
+      width: 4px !important;
+      height: 4px !important;
+      background-color: #007bff !important;
+      border-radius: 50% !important;
+    }
+
+    /* --- 3. フォーム本体 --- */
+    #quick-contact-wrapper #quick-contact-form {
+      display: none !important;
+      position: fixed !important;
+      z-index: 2147483647 !important;
+      background: rgba(0, 0, 0, 0.5) !important;
+      backdrop-filter: blur(15px) !important;
+      -webkit-backdrop-filter: blur(15px) !important;
+      border-radius: 16px !important;
+      padding: 24px !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    @media (min-width: 601px) {
+      #quick-contact-wrapper #quick-contact-form {
+        right: 100px !important;
+        top: 35% !important;
+        transform: translateY(-50%) !important;
+        width: 300px !important;
+      }
+    }
+
+    @media (max-width: 600px) {
+      #quick-contact-wrapper #quick-contact-form {
+        right: 15px !important;
+        left: 15px !important;
+        width: auto !important;
+        top: 35% !important;
+      }
+    }
+
+    #quick-contact-wrapper textarea#qc-message {
+      display: block !important;
+      width: 100% !important;
+      height: 120px !important;
+      padding: 12px !important;
+      background: rgba(255, 255, 255, 0.15) !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      border-radius: 8px !important;
+      color: #ffffff !important;
+      font-size: 16px !important;
+      margin-bottom: 10px !important;
+      outline: none !important;
+    }
+
+    #quick-contact-wrapper #qc-submit-btn {
+      display: flex !important;
+      width: 100% !important;
+      height: 45px !important;
+      background: #007bff !important;
+      color: #ffffff !important;
+      border-radius: 22px !important;
+      font-size: 16px !important;
+      font-weight: bold !important;
+      justify-content: center !important;
+      align-items: center !important;
+      cursor: pointer !important;
+    }
+
+    #quick-contact-wrapper .qc-close-label {
+      display: block !important;
+      color: #ccc !important;
+      font-size: 12px !important;
+      text-align: center !important;
+      margin-top: 10px !important;
+      cursor: pointer !important;
+    }
+  </style>
+
+  <div id="quick-contact-wrapper">
+    <div id="quick-contact-btn" onclick="toggleQCForm()">
+      <svg class="qcb-svg-icon" viewBox="0 0 24 24">
+        <path
+          d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+      </svg>
+      <div id="qcb-dots-grid">
+        <div class="qcb-dot"></div>
+        <div class="qcb-dot"></div>
+        <div class="qcb-dot"></div>
+        <div class="qcb-dot"></div>
+      </div>
+    </div>
+
+    <div id="quick-contact-form">
+      <textarea id="qc-message" placeholder="メッセージを入力..."></textarea>
+      <button id="qc-submit-btn" onclick="sendQuickMail()">メッセージを送信</button>
+      <p class="qc-close-label" onclick="toggleQCForm()">[ 閉じる ]</p>
+      <p id="qc-status"
+        style="color:#fff !important; text-align:center !important; margin-top:5px !important; font-size:12px !important;">
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function toggleQCForm() {
+      const f = document.getElementById('quick-contact-form');
+      const isHidden = window.getComputedStyle(f).display === 'none';
+      f.style.setProperty('display', isHidden ? 'block' : 'none', 'important');
+    }
+
+    async function sendQuickMail() {
+      const msgInput = document.getElementById('qc-message');
+      const status = document.getElementById('qc-status');
+      const btn = document.getElementById('qc-submit-btn');
+      if (!msgInput.value) return;
+
+      status.innerText = "送信中...";
+      btn.style.pointerEvents = "none";
+      btn.style.opacity = "0.5";
+
+      const fullMessage = "【送信元: " + document.title + "】\nURL: " + window.location.href + "\n\n" + msgInput.value;
+      const url = "https://script.google.com/macros/s/AKfycbzVAp7wdsa1UXzrUStr7kkBTc1PMzBeVc-zWk2g6dvytVAafskIri2TGhwU3rCXK8-DiA/exec";
+
+      try {
+        await fetch(url, { method: "POST", mode: "no-cors", body: JSON.stringify({ message: fullMessage }) });
+        alert("送信完了。ありがとうございます");
+        msgInput.value = "";
+        status.innerText = "";
+        document.getElementById('quick-contact-form').style.setProperty('display', 'none', 'important');
+      } catch (e) {
+        status.innerText = "Error!";
+      } finally {
+        btn.style.pointerEvents = "auto";
+        btn.style.opacity = "1";
+      }
+    }
+  </script>
+
+
+
+
+
+  <div id="stkr"></div>
+  <div class="links"></div>
+
+  <!-- JavaScript -->
+  <script src="assets/js/jquery.min.js"></script>
+  <script type="text/javascript">
+    // マウスストーカー関連の要素（任意で変更してください）
+    const mouseStalker = "#stkr"; // マウスストーカーになる要素を指定
+    const mouseTarget = ".stkr-target"; // リンクなどアクションを付けたい要素を指定
+    const mouseStalkerArea = window; // マウスストーカーが機能する要素を指定
+
+    // 処理で使う変数たち
+    const stkrSize = parseInt($(mouseStalker).css("width").replace(/px/, ""));
+    const stkrPosX = parseInt($(mouseStalker).css("left").replace(/px/, ""));
+    const stkrPosY = parseInt($(mouseStalker).css("top").replace(/px/, ""));
+    const cssPosAjust = stkrPosX + (stkrSize / 2);
+    let scale = 1;
+
+    // 追従用の処理
+    $(mouseStalkerArea).hover(function () {
+      $(mouseStalkerArea).mousemove(function (e) {
+        let x = e.clientX - cssPosAjust;
+        let y = e.clientY - cssPosAjust;
+        $(mouseStalker).css({
+          "transform": "translate(" + x + "px," + y + "px) scale(" + scale + ")",
+        });
+      });
+    });
+
+    // リンクホバーの処理
+    $(mouseTarget).hover(function (e) {
+      scale = 2;
+      let x = e.clientX - cssPosAjust;
+      let y = e.clientY - cssPosAjust;
+      $(mouseStalker).css({
+        "transform": "translate(" + x + "px," + y + "px) scale(" + scale + ")",
+      });
+    }, function () {
+      scale = 1;
+    });
+  </script>
+
+
+
+  <div id="bottom"></div>
+
+  <br /><br />
+  <img src="images/webmark-logo.png" alt="webMark" width="100%" />
+
+  <!-- Page Wrapper -->
+  <div id="page-wrapper">
+
+    <!-- Header -->
+    <header id="header">
+
+      <h1><span class="blink"><a href="/">webMark:(BACK)HOME</a></h1>
+      <nav id="nav">
+        <ul>
+          <li class="special">
+            <a href="#menu" class="menuToggle"><span class="blink"><b>MENU ▽ CLICK ON ▽</b></span></a>
+            <div id="menu">
+              <ul>
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="php.html">PHP+MySQL+javaScript</a></li>
+                <li><a href="ec.html">EC-CUBE / welcart</a></li>
+                <li><a href="wordpress.html">WORDPRESS</a></li>
+                <li><a href="others.html">OTHER(IT WORK)S</a></li>
+                <li><a href="music.html">NIIRO MUSIC</a></li>
+                <li><a href="books.html">BOOKS(Kindle)</a></li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Main -->
+    <article id="main">
+
+      <section class="wrapper style5">
+        <div class="inner">
+
+          *以下以外にも近年shopify,ec-froce等案件経験も増えており、ご相談いただけますと幸いでございます
+          <HR>
+
+          <section>
+            <h4>EC-CUBE(2/3/4系)</h4>
+            <p>国内開発の高品質ECサイトパッケージEC-CUBEのカスタマイズ導入、運用操作説明を行なっております。</p>
+
+            <header>
+              <h4>☆独自ECサイトの構築は以下のメリットがございます</h4>
+              <p>1.自社の業務フローに最適化されたECサイトを構築されたい<br />
+                2.モール出店における高額な販売手数料徴収を避けたい<br />
+                ※ 独自商品販売の場合、特に利幅を上げられる可能性が高くなります
+                ※<br /><br />拡張例：時間,場所が指定されたイベント参加/施設予約、決済をその場で受付！☆ポータルサイトを介せずに直接お取引☆もちろんスマホからもご利用可☆<br /><a
+                  href="http://webmark.tokyo/party/" target="_blank">チケット販売 / 施設予約等デモサイト</a></p>
+            </header>
+
+          </section>
+
+          <section>
+            <h5>
+              << 改修例>>
+            </h5>
+            <pre><code>商品項目 ( 各種表現 ) 調整,同じく各種カテゴリ調整関連,<br />ランク別に商品価格が異なる ( b2b ) サイト,<br />会員専用サイト,会員コンテンツ制限,会員項目調整,<br />複数分離配送の追跡番号一元管理&一括通知,<br />日本語住所等の自動ローマ字変換 ( 海外出荷/配送サイト ),<br />必要操作ワークフローを顧客専用業務フローに調整,<br />スクラッチ決済繋ぎ込み ( 各種決済代行会社API対応 ),<br />リアルタイムチャットボット実装,<br />注文済顧客-管理者間ファイル共有,<br />会員ポイントのみで決済可 ( 商品カテゴリで制限 ) 等々</code></pre>
+          </section>
+
+          <HR>
+
+          <section>
+            <h4>welcart</h4>
+            <p>wordPress + welcartのカスタマイズ導入、運用操作説明を行なっております。</p>
+
+            <header>
+              <h4>★welcartの構築は以下のメリットがございます</h4>
+              <p>1.初期状態でオプション(バリエーション)設定が無制限*ec-cubeは要有料プラグイン<br />
+                2.安価なデザインテンプレが存在する<br />
+                ※ モール出店における高額な販売手数料徴収を避けられるのは同様(独自ecサイト)</p>
+            </header>
+
+          </section>
+
+          <section>
+            <h5>*これまでの実績における参考費用価格</h5>
+            <div class="table-wrapper">
+              <table class="alt">
+                <thead>
+                  <tr>
+                    <th>作業内容</th>
+                    <th>詳細</th>
+                    <th>価格</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ver.3,4系 新規構築</td>
+                    <td>ver.3,4はレスポンシブ ( スマホ、タブレット ) に対応可能です。<br />( NDA締結後 ) サーバの各種認証情報をお知らせください</td>
+                    <td>49,999-</td>
+                  </tr>
+                  <tr>
+                    <td>ver.2系 新規構築</td>
+                    <td>ver.2はPC用・スマホ、タブレット用テンプレートが別々です。<br />( NDA締結後 ) サーバの各種認証情報をお知らせください</td>
+                    <td>99,999-</td>
+                  </tr>
+                  <tr>
+                    <td>welcart 新規構築</td>
+                    <td>レスポンシブ ( スマホ、タブレット ) に対応可能です。<br />( NDA締結後 ) サーバの各種認証情報をお知らせください</td>
+                    <td>49,999-</td>
+                  </tr>
+                  <tr>
+                    <td>不具合解消</td>
+                    <td>ご内容により、以下、<br />機能改修、コンテンツ改修のいずれかの対応となります</td>
+                    <td>NA-</td>
+                  </tr>
+                  <tr>
+                    <td>機能改修</td>
+                    <td>プラグイン実装を含めた各種機能改修</td>
+                    <td>19,999-</td>
+                  </tr>
+                  <tr>
+                    <td>コンテンツ改修</td>
+                    <td>テンプレートを含めた各種コンテンツ改修</td>
+                    <td>1,500-</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="2"></td>
+                    <td>単位：円(JPY)</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </section>
+
+          <center>
+            <img src="/ec-cube.png" alt="ec-cube" style="max-width:100%; opacity:0.95;">
+            <br />
+          </center>
+
+          <section>
+            <h5>その他 補足</h5>
+            <p><span class="image left"><img src="images/ec.jpg" alt="" /></span>ver.3系はBootstrapが採用されておりますが、
+              2系のシステムをBootstrapでレスポンシブとすることも可能です*別途 対応工数 ( 費用 )
+              がかかってしまいます。<br /><br />複数ECサイトにおける在庫管理システム,製品管理システム,顧客・仕入先管理システム等もソリューションがございますので是非ご相談ください。</p>
+          </section>
+
+        </div>
+      </section>
+    </article>
+
+    <!-- Footer -->
+    <footer id="footer">
+      <ul class="icons">
+        <li>
+          <span class="blink">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdeHHDxteRnScTiZ9htni38_wZpIo4Z6kpAohr5h6aITYxV7A/formResponse"
+              target="_blank" class="icon fa-envelope-o" rel="noopener noreferrer"><span
+                class="label">Email</span>&nbsp;<u>ご相談・お見積はこちら</u></a>
+          </span>
+        </li>&nbsp;
+        <li><a href="http://www.facebook.com/share.php?u=https://webmark.tokyo" target="_blank" class="icon fa-facebook"
+            rel="noopener noreferrer"><span class="label">Facebook</span></a></li>
+        <li><a href="https://twitter.com/share" target="_blank" class="icon fa-twitter" rel="noopener noreferrer"><span
+              class="label">Twitter</span></a></li>
+        <br /><br /><br />
+        <li style="color:#777c40;">◉以下ランサーズ,クラウドワークス,ココナラからもご連絡可能でございます</li>
+      </ul>
+
+      <p>
+        <a href="https://www.lancers.jp/profile/webMark" target="_blank" rel="noopener noreferrer"><img
+            src="icon_rank_authorized.svg" class="scroll-effect" id="myImage4" alt="認定ランサー" width="100px" /><img
+            src="ls.png" class="gif-effect" alt="lancers" /></a>
+        &ensp;&ensp;
+        <a href="https://crowdworks.jp/public/employees/612901" target="_blank" rel="noopener noreferrer"><img
+            src="pw.png" class="gif-effect" alt="プロクラウドワーカー" /></a>
+      </p>
+
+      <p>
+        <a href="https://coconala.com/users/2018576" target="_blank" rel="noopener noreferrer"><img src="coco.png"
+            class="gif-effect" alt="ココナラ" width="300px" /></a>
+      </p>
+
+      <ul class="copyright">
+        <li><a href="/" style="color:#21b2a6;">&copy; WebMark. 2009-2026</a></li>
+      </ul>
+
+      <div align="right"><a href="#bottom" class="more scrolly"><img src="images/top.png"></a></div>
+
+      <img src="images/webmark-logo.png" class="scroll-effect" id="myImage5" alt="webMark" width="100%"
+        style="opacity:0.77;" />
+      <br /><br /><br />
+    </footer>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/jquery.scrollex.min.js"></script>
+  <script src="assets/js/jquery.scrolly.min.js"></script>
+  <script src="assets/js/skel.min.js"></script>
+  <script src="assets/js/util.js"></script>
+  <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+  <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>
