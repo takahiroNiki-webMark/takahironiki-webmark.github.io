@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>webMark.｜EC-CUBE・WordPress・PHP開発・保守</title>
   <meta name="keywords" content="ウェブマーク,webmark,webMark,EC-CUBE,welcart,WORDPRESS,PHP,スプレットシート,電子書籍,システム開発" />
-  <meta name="description" content="EC-CUBE・WordPress・PHP開発に特化。15年以上の実績を持つエンジニアが、短納期・低コストで高品質なECサイト構築やシステム保守、カスタマイズを提供します。" />
+  <meta name="description"
+    content="EC-CUBE・WordPress・PHP開発に特化。15年以上の実績を持つエンジニアが、短納期・低コストで高品質なECサイト構築やシステム保守、カスタマイズを提供します。" />
 
   <script type="application/ld+json">
     {
@@ -42,13 +44,13 @@
 
   <link rel="stylesheet" href="assets/css/main.css" />
   <script>
-    (function(i, s, o, g, r, a, m) {
+    (function (i, s, o, g, r, a, m) {
       i["GoogleAnalyticsObject"] = r;
       ((i[r] =
-          i[r] ||
-          function() {
-            (i[r].q = i[r].q || []).push(arguments);
-          }),
+        i[r] ||
+        function () {
+          (i[r].q = i[r].q || []).push(arguments);
+        }),
         (i[r].l = 1 * new Date()));
       ((a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]));
       a.async = 1;
@@ -93,10 +95,23 @@
     }
 
     @keyframes floatHex {
-      0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
-      20% { opacity: 0.4; }
-      80% { opacity: 0.4; }
-      100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+      0% {
+        transform: translateY(110vh) rotate(0deg);
+        opacity: 0;
+      }
+
+      20% {
+        opacity: 0.4;
+      }
+
+      80% {
+        opacity: 0.4;
+      }
+
+      100% {
+        transform: translateY(-20vh) rotate(360deg);
+        opacity: 0;
+      }
     }
 
     @media screen and (min-width: 480px) {
@@ -225,8 +240,13 @@
     }
 
     @keyframes blinking {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
     }
 
     .gif-effect {
@@ -351,6 +371,7 @@
       align-items: center !important;
       text-decoration: none !important;
     }
+
     .menuToggle::after {
       content: "" !important;
       display: inline-block !important;
@@ -358,242 +379,254 @@
       height: 2px !important;
       background: #fff !important;
       box-shadow: 0 6px 0 #fff, 0 -6px 0 #fff !important;
-      margin-left: 10px !important; /* 点滅テキストの右側にアイコンを配置 */
+      margin-left: 10px !important;
+      /* 点滅テキストの右側にアイコンを配置 */
     }
-</style>
+  </style>
 </head>
 
 <body class="landing">
 
   <div class="hex-overlay" id="hexLayer"></div>
 
-<style>
-    #quick-contact-wrapper, 
-    #quick-contact-wrapper div, 
-    #quick-contact-wrapper span, 
-    #quick-contact-wrapper textarea, 
-    #quick-contact-wrapper button, 
+  <style>
+    #quick-contact-wrapper,
+    #quick-contact-wrapper div,
+    #quick-contact-wrapper span,
+    #quick-contact-wrapper textarea,
+    #quick-contact-wrapper button,
     #quick-contact-wrapper p,
     #quick-contact-wrapper svg {
-        all: unset !important;
-        box-sizing: border-box !important;
-        font-family: sans-serif !important;
+      all: unset !important;
+      box-sizing: border-box !important;
+      font-family: sans-serif !important;
     }
 
     #quick-contact-wrapper #quick-contact-btn {
-        position: fixed !important;
-        right: 15px !important;
-        top: 9% !important;
-        transform: translateY(-50%) !important;
-        width: 75px !important; 
-        height: 42px !important;
-        background: rgba(255, 255, 255, 0.5) !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
-        border-radius: 21px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        padding: 0 14px !important;
-        cursor: pointer !important;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1) !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        z-index: 2147483647 !important;
-        pointer-events: auto !important;
+      position: fixed !important;
+      right: 15px !important;
+      top: 9% !important;
+      transform: translateY(-50%) !important;
+      width: 75px !important;
+      height: 42px !important;
+      background: rgba(255, 255, 255, 0.5) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border-radius: 21px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 0 14px !important;
+      cursor: pointer !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      z-index: 2147483647 !important;
+      pointer-events: auto !important;
     }
 
     #quick-contact-wrapper .qcb-svg-icon {
-        display: block !important;
-        width: 22px !important;
-        height: 22px !important;
-        fill: #007bff !important;
+      display: block !important;
+      width: 22px !important;
+      height: 22px !important;
+      fill: #007bff !important;
     }
 
     #quick-contact-wrapper #qcb-dots-grid {
-        display: grid !important;
-        grid-template-columns: 4px 4px !important;
-        grid-gap: 3px !important;
-        width: 11px !important;
-        height: 11px !important;
+      display: grid !important;
+      grid-template-columns: 4px 4px !important;
+      grid-gap: 3px !important;
+      width: 11px !important;
+      height: 11px !important;
     }
 
     #quick-contact-wrapper .qcb-dot {
-        display: block !important;
-        width: 4px !important;
-        height: 4px !important;
-        background-color: #007bff !important;
-        border-radius: 50% !important;
+      display: block !important;
+      width: 4px !important;
+      height: 4px !important;
+      background-color: #007bff !important;
+      border-radius: 50% !important;
     }
 
     #quick-contact-wrapper #quick-contact-form {
-        display: none !important;
-        position: fixed !important;
-        z-index: 2147483647 !important;
-        background: rgba(0, 0, 0, 0.5) !important;
-        backdrop-filter: blur(15px) !important;
-        -webkit-backdrop-filter: blur(15px) !important;
-        border-radius: 16px !important;
-        padding: 24px !important; 
-        box-shadow: 0 20px 60px rgba(0,0,0,0.4) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      display: none !important;
+      position: fixed !important;
+      z-index: 2147483647 !important;
+      background: rgba(0, 0, 0, 0.5) !important;
+      backdrop-filter: blur(15px) !important;
+      -webkit-backdrop-filter: blur(15px) !important;
+      border-radius: 16px !important;
+      padding: 24px !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
     }
 
     @media (min-width: 601px) {
-        #quick-contact-wrapper #quick-contact-form { 
-            right: 100px !important; top: 35% !important; transform: translateY(-50%) !important; width: 300px !important; 
-        }
+      #quick-contact-wrapper #quick-contact-form {
+        right: 100px !important;
+        top: 35% !important;
+        transform: translateY(-50%) !important;
+        width: 300px !important;
+      }
     }
+
     @media (max-width: 600px) {
-        #quick-contact-wrapper #quick-contact-btn {
-            top: 10% !important;
-        }
-        #quick-contact-wrapper #quick-contact-form { 
-            right: 15px !important; left: 15px !important; width: auto !important; top: 35% !important; 
-        }
+      #quick-contact-wrapper #quick-contact-btn {
+        top: 10% !important;
+      }
+
+      #quick-contact-wrapper #quick-contact-form {
+        right: 15px !important;
+        left: 15px !important;
+        width: auto !important;
+        top: 35% !important;
+      }
     }
 
     #quick-contact-wrapper textarea#qc-message {
-        display: block !important;
-        width: 100% !important;
-        height: 120px !important;
-        padding: 12px !important;
-        background: rgba(255, 255, 255, 0.15) !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 8px !important;
-        color: #ffffff !important;
-        font-size: 16px !important;
-        margin-bottom: 10px !important;
-        outline: none !important;
+      display: block !important;
+      width: 100% !important;
+      height: 120px !important;
+      padding: 12px !important;
+      background: rgba(255, 255, 255, 0.15) !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      border-radius: 8px !important;
+      color: #ffffff !important;
+      font-size: 16px !important;
+      margin-bottom: 10px !important;
+      outline: none !important;
     }
 
     #quick-contact-wrapper #qc-submit-btn {
-        display: flex !important;
-        width: 100% !important;
-        height: 45px !important;
-        background: #007bff !important;
-        color: #ffffff !important;
-        border-radius: 22px !important;
-        font-size: 16px !important;
-        font-weight: bold !important;
-        justify-content: center !important;
-        align-items: center !important;
-        cursor: pointer !important;
+      display: flex !important;
+      width: 100% !important;
+      height: 45px !important;
+      background: #007bff !important;
+      color: #ffffff !important;
+      border-radius: 22px !important;
+      font-size: 16px !important;
+      font-weight: bold !important;
+      justify-content: center !important;
+      align-items: center !important;
+      cursor: pointer !important;
     }
 
     #quick-contact-wrapper .qc-close-label {
-        display: block !important;
-        color: #ccc !important;
-        font-size: 12px !important;
-        text-align: center !important;
-        margin-top: 10px !important;
-        cursor: pointer !important;
+      display: block !important;
+      color: #ccc !important;
+      font-size: 12px !important;
+      text-align: center !important;
+      margin-top: 10px !important;
+      cursor: pointer !important;
     }
 
 
-/* VPS・攻撃解析バナー共通 */
+    /* VPS・攻撃解析バナー共通 */
 
-.cool-banner{
-  width:100%;
-  max-width:1000px;
-  height:auto;
-  opacity:.85;
-  border-radius:12px;
-  display:block;
-  margin:0 auto;
-}
+    .cool-banner {
+      width: 100%;
+      max-width: 1000px;
+      height: auto;
+      opacity: .85;
+      border-radius: 12px;
+      display: block;
+      margin: 0 auto;
+    }
 
-/* PC時のみ少し小さく */
-@media(min-width:992px){
+    /* PC時のみ少し小さく */
+    @media(min-width:992px) {
 
-  .cool-banner{
-    max-width:900px;
-  }
+      .cool-banner {
+        max-width: 900px;
+      }
 
-}
+    }
 
-/* Hover演出 */
+    /* Hover演出 */
 
-.cool-banner:hover{
+    .cool-banner:hover {
 
-  filter:
-    brightness(1.08);
+      filter:
+        brightness(1.08);
 
-  box-shadow:
-    0 15px 40px rgba(33,178,166,.35);
+      box-shadow:
+        0 15px 40px rgba(33, 178, 166, .35);
 
-}
-
-
-.cool-banner{
-
-  border:1px solid rgba(33,178,166,.2);
-
-}
-
-.cool-banner:hover{
-
-  box-shadow:
-    0 0 20px rgba(33,178,166,.4),
-    0 0 50px rgba(33,178,166,.2);
-
-}
+    }
 
 
-</style>
+    .cool-banner {
 
-<div id="quick-contact-wrapper">
+      border: 1px solid rgba(33, 178, 166, .2);
+
+    }
+
+    .cool-banner:hover {
+
+      box-shadow:
+        0 0 20px rgba(33, 178, 166, .4),
+        0 0 50px rgba(33, 178, 166, .2);
+
+    }
+  </style>
+
+  <div id="quick-contact-wrapper">
     <div id="quick-contact-btn" onclick="toggleQCForm()" role="button" aria-label="クイックコンタクトを開く">
-        <svg class="qcb-svg-icon" viewBox="0 0 24 24">
-            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-        </svg>
-        <div id="qcb-dots-grid">
-            <div class="qcb-dot"></div><div class="qcb-dot"></div>
-            <div class="qcb-dot"></div><div class="qcb-dot"></div>
-        </div>
+      <svg class="qcb-svg-icon" viewBox="0 0 24 24">
+        <path
+          d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+      </svg>
+      <div id="qcb-dots-grid">
+        <div class="qcb-dot"></div>
+        <div class="qcb-dot"></div>
+        <div class="qcb-dot"></div>
+        <div class="qcb-dot"></div>
+      </div>
     </div>
 
     <div id="quick-contact-form">
-        <textarea id="qc-message" placeholder="メッセージを入力..."></textarea>
-        <button id="qc-submit-btn" onclick="sendQuickMail()">メッセージを送信</button>
-        <p class="qc-close-label" onclick="toggleQCForm()">[ 閉じる ]</p>
-        <p id="qc-status" style="color:#fff !important; text-align:center !important; margin-top:5px !important; font-size:12px !important;"></p>
+      <textarea id="qc-message" placeholder="メッセージを入力..."></textarea>
+      <button id="qc-submit-btn" onclick="sendQuickMail()">メッセージを送信</button>
+      <p class="qc-close-label" onclick="toggleQCForm()">[ 閉じる ]</p>
+      <p id="qc-status"
+        style="color:#fff !important; text-align:center !important; margin-top:5px !important; font-size:12px !important;">
+      </p>
     </div>
-</div>
+  </div>
 
-<script>
+  <script>
     function toggleQCForm() {
-        const f = document.getElementById('quick-contact-form');
-        const isHidden = window.getComputedStyle(f).display === 'none';
-        f.style.setProperty('display', isHidden ? 'block' : 'none', 'important');
+      const f = document.getElementById('quick-contact-form');
+      const isHidden = window.getComputedStyle(f).display === 'none';
+      f.style.setProperty('display', isHidden ? 'block' : 'none', 'important');
     }
 
     async function sendQuickMail() {
-        const msgInput = document.getElementById('qc-message');
-        const status = document.getElementById('qc-status');
-        const btn = document.getElementById('qc-submit-btn');
-        if (!msgInput.value) return;
-        
-        status.innerText = "送信中...";
-        btn.style.pointerEvents = "none";
-        btn.style.opacity = "0.5";
+      const msgInput = document.getElementById('qc-message');
+      const status = document.getElementById('qc-status');
+      const btn = document.getElementById('qc-submit-btn');
+      if (!msgInput.value) return;
 
-        const fullMessage = "【送信元: " + document.title + "】\nURL: " + window.location.href + "\n\n" + msgInput.value;
-        const url = "https://script.google.com/macros/s/AKfycbzVAp7wdsa1UXzrUStr7kkBTc1PMzBeVc-zWk2g6dvytVAafskIri2TGhwU3rCXK8-DiA/exec";
-        
-        try {
-            await fetch(url, { method: "POST", mode: "no-cors", body: JSON.stringify({ message: fullMessage }) });
-            alert("送信完了。ありがとうございます");
-            msgInput.value = "";
-            status.innerText = "";
-            document.getElementById('quick-contact-form').style.setProperty('display', 'none', 'important');
-        } catch (e) { 
-            status.innerText = "Error!";
-        } finally {
-            btn.style.pointerEvents = "auto";
-            btn.style.opacity = "1";
-        }
+      status.innerText = "送信中...";
+      btn.style.pointerEvents = "none";
+      btn.style.opacity = "0.5";
+
+      const fullMessage = "【送信元: " + document.title + "】\nURL: " + window.location.href + "\n\n" + msgInput.value;
+      const url = "https://script.google.com/macros/s/AKfycbzVAp7wdsa1UXzrUStr7kkBTc1PMzBeVc-zWk2g6dvytVAafskIri2TGhwU3rCXK8-DiA/exec";
+
+      try {
+        await fetch(url, { method: "POST", mode: "no-cors", body: JSON.stringify({ message: fullMessage }) });
+        alert("送信完了。ありがとうございます");
+        msgInput.value = "";
+        status.innerText = "";
+        document.getElementById('quick-contact-form').style.setProperty('display', 'none', 'important');
+      } catch (e) {
+        status.innerText = "Error!";
+      } finally {
+        btn.style.pointerEvents = "auto";
+        btn.style.opacity = "1";
+      }
     }
-</script>
+  </script>
 
   <div id="stkr"></div>
   <div class="links"></div>
@@ -611,11 +644,11 @@
     let scale = 1;
 
     let mouseX = 0,
-    mouseY = 0;
+      mouseY = 0;
 
     function animate() {
       const stkrEl = document.getElementById("stkr");
-      if(stkrEl) {
+      if (stkrEl) {
         stkrEl.style.transform = `translate(${mouseX}px, ${mouseY}px) scale(${scale})`;
       }
       requestAnimationFrame(animate);
@@ -627,9 +660,9 @@
       mouseY = e.clientY - cssPosAjust;
     });
 
-    window.onload = function() {
+    window.onload = function () {
       const hexLayer = document.getElementById('hexLayer');
-      const hexCount = 15; 
+      const hexCount = 15;
       for (let i = 0; i < hexCount; i++) {
         const h = document.createElement('div');
         h.className = 'hexagon';
@@ -750,95 +783,92 @@
               </center>
               <center>
                 <h5>
-                  <span class="blinkx" style="color: black">php</span><a href="php.html" target="_blank" style="color: black" rel="noopener noreferrer">▼DB+PHP/js,ts▼<br />スクラッチシステム開発</a>
+                  <span class="blinkx" style="color: black">php</span><a href="php.html" target="_blank"
+                    style="color: black" rel="noopener noreferrer">▼DB+PHP/js,ts▼<br />スクラッチシステム開発</a>
                 </h5>
                 <br />
                 <h5>
-                  <span class="blink" style="color: black">ec</span><a href="ec.html" target="_blank" style="color: black" rel="noopener noreferrer">EC-CUBE ver2/3/4.x他<br />独自ECサイト構築🛒</a>
+                  <span class="blink" style="color: black">ec</span><a href="ec.html" target="_blank"
+                    style="color: black" rel="noopener noreferrer">EC-CUBE ver2/3/4.x他<br />独自ECサイト構築🛒</a>
                 </h5>
                 <br />
 
 
                 <h5>
-                  <span class="blinkx" style="color: #21b2aa">IM</span><a href="attack1.png" target="_blank" style="color: black" rel="noopener noreferrer">サイバー攻撃対応<br />ログ解析・即時遮断・報告書作成</a>
+                  <span class="blinkx" style="color: #21b2aa">IM</span><a href="attack1.png" target="_blank"
+                    style="color: black" rel="noopener noreferrer">サイバー攻撃対応<br />ログ解析・即時遮断・報告書作成</a>
                 </h5>
                 <br />
 
                 <h5>
-                  <span class="blinkx" style="color: black">wp</span><a href="wordpress.html" target="_blank" style="color: black" rel="noopener noreferrer">各種CMS・ブログ構築<br />WORDPRESS導入</a>
-                </h5>
-                <br />
-
-
-                <h5>
-                  <span class="blinkx" style="color: #777c40">VS</span><a href="vps1.png" target="_blank" style="color: black" rel="noopener noreferrer">堅牢なLinuxサーバー<br />Web環境構築</a>
+                  <span class="blinkx" style="color: black">wp</span><a href="wordpress.html" target="_blank"
+                    style="color: black" rel="noopener noreferrer">各種CMS・ブログ構築<br />WORDPRESS導入</a>
                 </h5>
                 <br />
 
 
                 <h5>
-                  <span class="blinkx" style="color: #21b2aa">dx</span><a href="others.html" target="_blank" style="color: white" rel="noopener noreferrer">設計/チューニング/保守<br />【その他 IT WORKS】</a>
+                  <span class="blinkx" style="color: #777c40">VS</span><a href="vps1.png" target="_blank"
+                    style="color: black" rel="noopener noreferrer">堅牢なLinuxサーバー<br />Web環境構築</a>
+                </h5>
+                <br />
+
+
+                <h5>
+                  <span class="blinkx" style="color: #21b2aa">dx</span><a href="others.html" target="_blank"
+                    style="color: white" rel="noopener noreferrer">設計/チューニング/保守<br />【その他 IT WORKS】</a>
                 </h5>
                 <br />
                 <h5>
-                  <span class="blinkx" style="color: #777c40">kb</span><a href="books.html" target="_blank" style="color: white" rel="noopener noreferrer">Kindle出版支援<br />◉電子書籍制作◉</a>
+                  <span class="blinkx" style="color: #777c40">kb</span><a href="books.html" target="_blank"
+                    style="color: white" rel="noopener noreferrer">Kindle出版支援<br />◉電子書籍制作◉</a>
                 </h5>
                 <br />
                 <h5>
-                  <span class="blinkx" style="color: black">mu</span><a href="music.html" target="_blank" style="color: white" rel="noopener noreferrer">= 楽曲制作 =<br />Niiro♪Music♪</a>
+                  <span class="blinkx" style="color: black">mu</span><a href="music.html" target="_blank"
+                    style="color: white" rel="noopener noreferrer">= 楽曲制作 =<br />Niiro♪Music♪</a>
                 </h5>
                 <br />
-                <h5>
-                  <span style="color: black">x</span><a href="https://kingsilver.webmark.tokyo/" target="_blank" style="color: white" rel="noopener noreferrer">**King Silver<br />シルバーアクセサリー販売</a>
-                </h5>
-                <br />
+
               </center>
             </div>
           </div>
         </div>
 
 
-<center style="margin-bottom:20px;">
-    <img
-      src="https://webmark.tokyo/vps0.png"
-      id="myImage8"
-      class="scroll-effect banner-link-img cool-banner"
-    >
-</center>
+        <center style="margin-bottom:20px;">
+          <img src="https://webmark.tokyo/vps0.png" id="myImage8" class="scroll-effect banner-link-img cool-banner">
+        </center>
 
-<center style="margin-bottom:20px;">
-    <img
-      src="https://webmark.tokyo/attack0.png"
-      id="myImage8"
-      class="scroll-effect banner-link-img cool-banner"
-    >
-</center>
+        <center style="margin-bottom:20px;">
+          <img src="https://webmark.tokyo/attack0.png" id="myImage8" class="scroll-effect banner-link-img cool-banner">
+        </center>
 
 
         <div class="pc-only-content">
           <div class="feature-grid">
             <div class="feature-grid">
-            <div class="feature-card">
-              <h3>Custom【拡張/機能最適化】</h3>
-              <p>
-                確かな構築実績とカスタマイズ力で、理想のシステム、ECショップ、独自機能を実現。
-              </p>
-            </div>
-            <div class="feature-card">
-              <h3>Performance【安定/自律性】</h3>
-              <p>
-                サーバー構成最適化からアプリ/コンテンツ保守まで。止まらない自律的なシステムを提供。
-              </p>
-            </div>
-            <div class="feature-card">
-              <h3>Professional【迅速/品質】</h3>
-              <p>
-                エンジニア直通のスピード感とリーズナブルで柔軟な技術対応・支援がwebMark.の強みです。
-              </p>
+              <div class="feature-card">
+                <h3>Custom【拡張/機能最適化】</h3>
+                <p>
+                  確かな構築実績とカスタマイズ力で、理想のシステム、ECショップ、独自機能を実現。
+                </p>
+              </div>
+              <div class="feature-card">
+                <h3>Performance【安定/自律性】</h3>
+                <p>
+                  サーバー構成最適化からアプリ/コンテンツ保守まで。止まらない自律的なシステムを提供。
+                </p>
+              </div>
+              <div class="feature-card">
+                <h3>Professional【迅速/品質】</h3>
+                <p>
+                  エンジニア直通のスピード感とリーズナブルで柔軟な技術対応・支援がwebMark.の強みです。
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
     </section>
 
     <section id="two" class="wrapper alt style2" style="
@@ -877,7 +907,8 @@
           </p>
         </div>
         <div class="image">
-          <img src="images/niki2.jpg" loading="lazy" decoding="async" alt="webMark. システム開発イメージ" class="scroll-effect" id="myImage3" style="opacity: 0.8" />
+          <img src="images/niki2.jpg" loading="lazy" decoding="async" alt="webMark. システム開発イメージ" class="scroll-effect"
+            id="myImage3" style="opacity: 0.8" />
         </div>
       </section>
     </section>
@@ -886,14 +917,18 @@
       <ul class="icons">
         <li>
           <span class="blink">
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdeHHDxteRnScTiZ9htni38_wZpIo4Z6kpAohr5h6aITYxV7A/formResponse" target="_blank" class="icon fa-envelope-o" rel="noopener noreferrer"><span class="label">Email</span>&nbsp;<u>システム開発のご相談・お見積はこちら</u></a>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdeHHDxteRnScTiZ9htni38_wZpIo4Z6kpAohr5h6aITYxV7A/formResponse"
+              target="_blank" class="icon fa-envelope-o" rel="noopener noreferrer"><span
+                class="label">Email</span>&nbsp;<u>システム開発のご相談・お見積はこちら</u></a>
           </span>
         </li>
         <li>
-          <a href="http://www.facebook.com/share.php?u=https://webmark.tokyo" target="_blank" class="icon fa-facebook" rel="noopener noreferrer"><span class="label">Facebook</span></a>
+          <a href="http://www.facebook.com/share.php?u=https://webmark.tokyo" target="_blank" class="icon fa-facebook"
+            rel="noopener noreferrer"><span class="label">Facebook</span></a>
         </li>
         <li>
-          <a href="https://twitter.com/share" target="_blank" class="icon fa-twitter" rel="noopener noreferrer"><span class="label">Twitter</span></a>
+          <a href="https://twitter.com/share" target="_blank" class="icon fa-twitter" rel="noopener noreferrer"><span
+              class="label">Twitter</span></a>
         </li>
         <br /><br /><br />
         <li style="color: #777c40">
@@ -902,13 +937,17 @@
       </ul>
 
       <p>
-        <a href="https://www.lancers.jp/profile/webMark" target="_blank" rel="noopener noreferrer"><img src="icon_rank_authorized.svg" class="scroll-effect" id="myImage4" alt="ランサーズ認定ランサー証" width="100px" /><img src="ls.png" class="gif-effect" alt="Lancers（ランサーズ）プロフィールへ" /></a>
+        <a href="https://www.lancers.jp/profile/webMark" target="_blank" rel="noopener noreferrer"><img
+            src="icon_rank_authorized.svg" class="scroll-effect" id="myImage4" alt="ランサーズ認定ランサー証" width="100px" /><img
+            src="ls.png" class="gif-effect" alt="Lancers（ランサーズ）プロフィールへ" /></a>
         &ensp;&ensp;
-        <a href="https://crowdworks.jp/public/employees/612901" target="_blank" rel="noopener noreferrer"><img src="pw.png" class="gif-effect" alt="CrowdWorks（クラウドワークス）プロクラウドワーカー" /></a>
+        <a href="https://crowdworks.jp/public/employees/612901" target="_blank" rel="noopener noreferrer"><img
+            src="pw.png" class="gif-effect" alt="CrowdWorks（クラウドワークス）プロクラウドワーカー" /></a>
       </p>
 
       <p>
-        <a href="https://coconala.com/users/2018576" target="_blank" rel="noopener noreferrer"><img src="coco.png" class="gif-effect" alt="coconala（ココナラ）プロフィールへ" width="300px" /></a>
+        <a href="https://coconala.com/users/2018576" target="_blank" rel="noopener noreferrer"><img src="coco.png"
+            class="gif-effect" alt="coconala（ココナラ）プロフィールへ" width="300px" /></a>
       </p>
 
       <ul class="copyright">
@@ -921,7 +960,8 @@
         <a href="#bottom" class="more scrolly"><img src="images/top.png" alt="ページトップへ戻る" /></a>
       </div>
 
-      <img src="images/webmark-logo.png" class="scroll-effect" id="myImage5" alt="webMark.（ウェブマーク）フッターロゴ" width="100%" style="opacity: 0.77" />
+      <img src="images/webmark-logo.png" class="scroll-effect" id="myImage5" alt="webMark.（ウェブマーク）フッターロゴ" width="100%"
+        style="opacity: 0.77" />
       <br /><br /><br />
     </footer>
   </div>
@@ -935,4 +975,5 @@
   <canvas class="background"></canvas>
   <script src="assets/js/particles.min.js"></script>
 </body>
+
 </html>
