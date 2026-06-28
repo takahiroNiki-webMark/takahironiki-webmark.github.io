@@ -10,14 +10,14 @@ import {
   deleteTask,
   createProject,
   createTask
-} from "./state.js";
+} from "https://takahironiki-webmark.github.io/pkan/js/state.js";
 
 import {
   dom,
   initDom,
   renderProjectList,
   renderDetail
-} from "./ui.js";
+} from "https://takahironiki-webmark.github.io/pkan/js/ui.js";
 
 async function init() {
   await loadData();
