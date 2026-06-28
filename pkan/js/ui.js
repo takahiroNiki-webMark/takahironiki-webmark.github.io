@@ -1,5 +1,5 @@
 // ui.js
-import { state } from "./state.js";
+import { state } from "https://takahironiki-webmark.github.io/pkan/js/state.js";
 
 export const dom = {};
 
