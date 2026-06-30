@@ -22,8 +22,8 @@ import {
 
 async function init() {
   await loadData();
-
-// 💡 ここを追加！画面を開いた直後は強制的に「未選択」状態にする
+  
+  // 初期表示時は必ず未選択にする
   state.selectedProjectId = null;
 
   initDom();
@@ -31,7 +31,6 @@ async function init() {
   setupEvents();
 }
 
-// 画面全体の再描画をまとめる関数
 function doRender() {
   renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
   renderDetail(
@@ -67,7 +66,7 @@ async function moveTaskHandler(projectId, from, to) {
   doRender();
 }
 
-// 💡 課題編集モーダルを開く処理
+// 課題編集モーダルを開く処理
 async function editTaskHandler(projectId, taskId) {
   const project = state.projects.find(p => p.id === projectId);
   if (!project || !project.tasks) return;
@@ -84,7 +83,7 @@ async function editTaskHandler(projectId, taskId) {
 
   modal.style.display = "flex";
 
-  // モーダル内の保存ボタン
+  // モーダル内「保存」
   document.getElementById("save-task-edit-btn").onclick = async () => {
     const title = document.getElementById("edit-task-title").value.trim();
     if (!title) {
@@ -107,7 +106,7 @@ async function editTaskHandler(projectId, taskId) {
     alert("課題を更新しました！");
   };
 
-  // モーダル内のキャンセルボタン
+  // モーダル内「キャンセル」
   document.getElementById("cancel-task-edit-btn").onclick = () => {
     modal.style.display = "none";
   };
@@ -138,7 +137,7 @@ async function editProjectNameHandler() {
   alert("プロジェクト名称を変更しました！");
 }
 
-// GoogleNoteBookLM URL編集ポップアップ
+// GoogleNoteBookLM URL編集
 async function editGnoteUrlHandler() {
   const project = state.projects.find(p => p.id === state.selectedProjectId);
   if (!project) return;
@@ -152,7 +151,7 @@ async function editGnoteUrlHandler() {
   alert("GoogleNoteBookLMのURLを更新しました！");
 }
 
-// GoogleDrive URL編集ポップアップ
+// GoogleDrive URL編集
 async function editGdriveUrlHandler() {
   const project = state.projects.find(p => p.id === state.selectedProjectId);
   if (!project) return;
@@ -165,7 +164,6 @@ async function editGdriveUrlHandler() {
   doRender();
   alert("GoogleDriveのURLを更新しました！");
 }
-
 
 /* ──── イベント初期設定 ──── */
 function setupEvents() {
@@ -191,16 +189,19 @@ function setupEvents() {
     alert("新規プロジェクトを作成しました！");
   };
 
-  // メモ保存ボタン（手動）
+  // メモ保存ボタン
   document.getElementById("save-project-memo-btn").onclick = async () => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
-    if (!project) return;
+    if (!project) {
+      alert("プロジェクトが選択されていません。一覧から詳細を開いてください。");
+      return;
+    }
     project.memo = document.getElementById("detail-project-memo").value;
     await syncToFirebase();
     alert("メモをFirebaseに保存しました！");
   };
 
-  // メモ欄のタイピング自動保存（念のため残す・通知なし）
+  // メモ欄の自動保存
   let memoTimeout;
   document.getElementById("detail-project-memo").oninput = (e) => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
@@ -217,7 +218,7 @@ function setupEvents() {
   document.getElementById("create-task-btn").onclick = async () => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
     if (!project) {
-      alert("右側の詳細画面が表示されている（プロジェクトが選択されている）状態で作成してください。");
+      alert("プロジェクトを選択した状態で作成してください。");
       return;
     }
 
@@ -239,7 +240,6 @@ function setupEvents() {
 
     await createTask(project.id, taskData);
 
-    // 入力欄をクリア
     document.getElementById("new-task-due").value = "";
     titleInput.value = "";
     document.getElementById("new-task-detail").value = "";
