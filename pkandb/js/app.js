@@ -22,6 +22,10 @@ import {
 
 async function init() {
   await loadData();
+
+// 💡 ここを追加！画面を開いた直後は強制的に「未選択」状態にする
+  state.selectedProjectId = null;
+
   initDom();
   doRender();
   setupEvents();
