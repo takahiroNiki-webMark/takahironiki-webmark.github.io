@@ -1,1 +1,223 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>プロジェクト / 顧客管理</title>
+  <link rel="stylesheet" href="https://takahironiki-webmark.github.io/pkandb/css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1>プロジェクト / 顧客管理</h1>
+    <div class="muted">UI検討用 / HTML+CSS+JS版</div>
+  </header>
+
+  <main>
+
+    <!-- ============================
+         セクション1：一覧/新規作成
+         ============================ -->
+    <section class="panel" id="index-panel">
+      <h2>【プロジェクト】</h2>
+
+      <!-- 1-1 プロジェクト一覧 -->
+      <div class="section-block">
+        <h3>1-1. プロジェクト一覧</h3>
+        <div class="project-list" id="project-list"></div>
+      </div>
+
+      <!-- 1-2 新規プロジェクト作成 -->
+      <div class="section-block">
+        <h3>1-2. 新規プロジェクト作成</h3>
+
+        <div class="form-row">
+          <label>
+            <font color="red">*</font>新規案件名称
+          </label>
+          <input type="text" id="new-project-name" placeholder="例：プロジェクトxxx / xxx様" />
+        </div>
+
+        <div class="form-row">
+          <label>GoogleNoteBookLMのURL</label>
+          <input type="text" id="new-project-gnote" placeholder="https://notebooklm.google.com/notebook/..." />
+        </div>
+
+        <div class="form-row">
+          <label>プロジェクトフォルダGoogleDriveのURL</label>
+          <input type="text" id="new-project-gdrive" placeholder="https://drive.google.com/..." />
+        </div>
+
+        <button class="primary" id="create-project-btn">＋ プロジェクト作成</button>
+      </div>
+    </section>
+
+    <!-- ============================
+         セクション2：プロジェクト詳細
+         ============================ -->
+    <section class="panel" id="detail-panel">
+      <h2>【詳細】</h2>
+
+      <div id="no-project-selected" class="muted">
+        左の一覧からプロジェクトを選択してください。
+      </div>
+
+      <div id="project-detail" style="display:none;">
+        <!-- 2-1 プロジェクト名称 -->
+        <div class="section-block">
+          <h3>2-1. プロジェクト名称</h3>
+          <div class="link-display">
+            <span id="detail-project-name"></span>
+            <button class="small" id="edit-project-name-btn">⇐ 編集</button>
+          </div>
+        </div>
+
+        <!-- 2-2 プロジェクトメモ -->
+        <div class="section-block">
+          <h3>2-2. メモ</h3>
+          <textarea id="detail-project-memo"></textarea>
+          <button class="small" id="save-project-memo-btn">⇑ メモ保存</button>
+        </div>
+
+        <!-- 2-3 プロジェクト課題管理 -->
+        <div class="section-block">
+          <h3>2-3. プロジェクト課題管理</h3>
+
+          <table class="task-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>並替</th>
+                <th>期日</th>
+                <th>概要</th>
+                <th>課題詳細内容</th>
+                <th>状況</th>
+                <th>担当者</th>
+                <th>作成者</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="task-list"></tbody>
+          </table>
+
+          <div class="new-task-section">
+            <h4 style="margin-top:20px; font-size:12px; color:red;">新規課題作成</h4>
+          </div>
+
+          <div class="form-row">
+            <label>期日</label>
+            <input type="date" id="new-task-due" />
+          </div>
+
+          <div class="form-row">
+            <label>課題名もしくは概要</label>
+            <input type="text" id="new-task-title" />
+          </div>
+
+          <div class="form-row">
+            <label>課題詳細内容</label>
+            <textarea id="new-task-detail"></textarea>
+          </div>
+
+          <div class="form-row">
+            <label>状況</label>
+            <select id="new-task-status">
+              <option value="未着手">未着手</option>
+              <option value="進行中">進行中</option>
+              <option value="完了">完了</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>担当者</label>
+            <input type="text" id="new-task-assignee" />
+          </div>
+
+          <div class="form-row">
+            <label>作成者</label>
+            <input type="text" id="new-task-creator" />
+          </div>
+
+          <button class="primary" id="create-task-btn">＋ 課題作成</button>
+        </div>
+
+        <!-- 2-4 GoogleNoteBookLM URL -->
+        <div class="section-block">
+          <h3>2-4. 当該プロジェクトGoogleNoteBookLMのURLリンク</h3>
+          <div class="link-display">
+            <span style="opacity:0.7;">🔗</span>
+            <a id="detail-gnote-url" class="muted" href="#" target="_blank" rel="noopener noreferrer"></a>
+            <button class="small" id="edit-gnote-url-btn">⇐ 編集</button>
+          </div>
+        </div>
+
+        <!-- 2-5 GoogleDrive URL -->
+        <div class="section-block">
+          <h3>2-5. 当該プロジェクトフォルダGoogleDriveのURLリンク</h3>
+          <div class="link-display">
+            <span style="opacity:0.7;">🔗</span>
+            <a id="detail-gdrive-url" class="muted" href="#" target="_blank" rel="noopener noreferrer"></a>
+            <button class="small" id="edit-gdrive-url-btn">⇐ 編集</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================
+     課題編集モーダル
+     ============================ -->
+  <div class="modal" id="task-edit-modal" style="display:none;">
+    <div class="modal-content">
+      <h3>課題編集</h3>
+
+      <div class="form-row">
+        <label>期日</label>
+        <input type="date" id="edit-task-due">
+      </div>
+
+      <div class="form-row">
+        <label>課題名 / 概要</label>
+        <input type="text" id="edit-task-title">
+      </div>
+
+      <div class="form-row">
+        <label>詳細内容</label>
+        <textarea id="edit-task-detail"></textarea>
+      </div>
+
+      <div class="form-row">
+        <label>状況</label>
+        <select id="edit-task-status">
+          <option value="未着手">未着手</option>
+          <option value="進行中">進行中</option>
+          <option value="完了">完了</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>担当者</label>
+        <input type="text" id="edit-task-assignee">
+      </div>
+
+      <div class="form-row">
+        <label>作成者</label>
+        <input type="text" id="edit-task-creator">
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="primary" id="save-task-edit-btn">保存</button>
+        <button class="danger" id="cancel-task-edit-btn">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="https://takahironiki-webmark.github.io/pkan/js/app.js"></script>
+
+</body>
+
+</html>
