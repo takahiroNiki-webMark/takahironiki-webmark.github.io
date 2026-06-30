@@ -40,12 +40,11 @@ export function renderProjectList(onMove, onSelect, onDelete) {
   });
 }
 
-// 💡 編集ボタンなどのコールバック関数を受け取れるように拡張
 export function renderDetail(onMoveTask, onEditTask, onDeleteTask, onEditName, onEditGnote, onEditGdrive) {
   const project = state.projects.find(p => p.id === state.selectedProjectId);
 
   if (!project) {
-    dom.noProjectSelectedEl.style.style.display = "block";
+    dom.noProjectSelectedEl.style.display = "block";
     dom.projectDetailEl.style.display = "none";
     return;
   }
@@ -56,7 +55,7 @@ export function renderDetail(onMoveTask, onEditTask, onDeleteTask, onEditName, o
   dom.detailProjectNameEl.textContent = project.name;
   dom.detailProjectMemoEl.value = project.memo || "";
 
-  // ボタンイベントの確実なバインド
+  // 編集ボタンへのイベント再バインド
   document.getElementById("edit-project-name-btn").onclick = onEditName;
   document.getElementById("edit-gnote-url-btn").onclick = onEditGnote;
   document.getElementById("edit-gdrive-url-btn").onclick = onEditGdrive;
