@@ -1,4 +1,4 @@
-// app.js
+// js/app.js
 import {
   state,
   loadData,
@@ -11,14 +11,14 @@ import {
   createProject,
   createTask,
   syncToFirebase
-} from "https://takahironiki-webmark.github.io/pkandb/js/state.js";
+} from "./state.js"; // 💡 修正：同じフォルダの state.js を読み込む
 
 import {
   dom,
   initDom,
   renderProjectList,
   renderDetail
-} from "https://takahironiki-webmark.github.io/pkandb/js/ui.js";
+} from "./ui.js"; // 💡 修正：同じフォルダの ui.js を読み込む
 
 async function init() {
   await loadData();
