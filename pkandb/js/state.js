@@ -1,6 +1,5 @@
 // state.js
 
-// 1. Firebaseの初期化設定
 const firebaseConfig = {
   databaseURL: "https://pkandb-8bfb4-default-rtdb.firebaseio.com/"
 };
@@ -15,13 +14,13 @@ export const state = {
   selectedProjectId: null
 };
 
-// 2. Firebaseからデータを読み込む処理（null防御を追加）
+// Firebaseからデータを読み込む（配列・オブジェクトの両方に対応する超強力版）
 export async function loadData() {
   const snapshot = await db.ref("pkan_data").once("value");
   const data = snapshot.val();
 
   if (data) {
-    // 💡 Firebaseの自動配列化で null が混ざった場合、綺麗に取り除く防御
+    // projects の読み込みとnull除去
     if (Array.isArray(data.projects)) {
       state.projects = data.projects.filter(p => p !== null);
     } else if (data.projects && typeof data.projects === 'object') {
@@ -30,7 +29,7 @@ export async function loadData() {
       state.projects = [];
     }
 
-    // 各プロジェクト内の tasks に null が混ざっている場合も綺麗にする
+    // 各プロジェクト内の tasks のnull除去
     state.projects.forEach(project => {
       if (!project.tasks) {
         project.tasks = [];
@@ -48,8 +47,8 @@ export async function loadData() {
   }
 }
 
-// 3. データを変更した後に、Firebase側へ自動で上書き保存する共通関数
-async function syncToFirebase() {
+// 💡 外部からでも手動保存できるように export をつけました
+export async function syncToFirebase() {
   await db.ref("pkan_data").set({
     projects: state.projects,
     selectedProjectId: state.selectedProjectId
@@ -76,8 +75,8 @@ export async function deleteProject(id) {
 }
 
 export async function createProject(name, gnoteUrl, gdriveUrl) {
-  // 💡 IDを数字ではなく、絶対に重複しない文字列（p + 現在の時刻スタンプ）にする
-  const newId = "p_" + Date.now();
+  // IDをタイムスタンプ文字列にして自動配列化を防ぐ
+  const newId = "p_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
 
   state.projects.push({
     id: newId,
@@ -91,7 +90,7 @@ export async function createProject(name, gnoteUrl, gdriveUrl) {
   await syncToFirebase();
 }
 
-/* ──── タスク（課題）操作 ──── */
+/* ──── タスク操作 ──── */
 export async function moveTask(projectId, fromIndex, toIndex) {
   const project = state.projects.find(p => p.id === projectId);
   if (!project) return;
@@ -122,8 +121,7 @@ export async function createTask(projectId, taskData) {
   const project = state.projects.find(p => p.id === projectId);
   if (!project) return;
 
-  // 💡 タスクのIDも同様に、文字列（t + 現在の時刻スタンプ）にする
-  const newId = "t_" + Date.now();
+  const newId = "t_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
 
   project.tasks.push({
     id: newId,
