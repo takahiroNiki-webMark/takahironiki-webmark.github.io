@@ -10,7 +10,7 @@ import {
   deleteTask,
   createProject,
   createTask,
-  syncToFirebase // 💡 手動保存用に追加
+  syncToFirebase // 手動保存用
 } from "https://takahironiki-webmark.github.io/pkandb/js/state.js";
 
 import {
@@ -37,7 +37,6 @@ async function moveProjectHandler(from, to) {
 
 async function selectProjectHandler(id) {
   await selectProject(id);
-  // プロジェクトを切り替えたので、一覧側（選択ハイライト用）と詳細側の両方を再描画
   renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
   renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
 }
@@ -76,7 +75,8 @@ async function editTaskHandler(projectId, taskId) {
 
   modal.style.display = "flex";
 
-  document.getElementById("modal-save-btn").onclick = async () => {
+  // HTMLのID「save-task-edit-btn」に合わせて修正
+  document.getElementById("save-task-edit-btn").onclick = async () => {
     const newValues = {
       due: dueInput.value,
       title: titleInput.value.trim(),
@@ -96,7 +96,8 @@ async function editTaskHandler(projectId, taskId) {
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
-  document.getElementById("modal-close-btn").onclick = () => {
+  // HTMLのID「cancel-task-edit-btn」に合わせて修正
+  document.getElementById("cancel-task-edit-btn").onclick = () => {
     modal.style.display = "none";
   };
 }
@@ -130,22 +131,48 @@ function setupEvents() {
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
-  // メモ欄のリアルタイム保存
+  // プロジェクト名称の編集を追加（未実装だった部分）
+  document.getElementById("edit-project-name-btn").onclick = async () => {
+    const project = state.projects.find(p => p.id === state.selectedProjectId);
+    if (!project) return;
+
+    const newName = prompt("プロジェクト名称を変更", project.name || "");
+    if (newName === null) return;
+    if (!newName.trim()) {
+      alert("名称を入力してください。");
+      return;
+    }
+
+    project.name = newName.trim();
+    await syncToFirebase();
+    renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
+    renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
+  };
+
+  // メモ欄のリアルタイム保存（※「メモ保存」ボタンを使用しない自動保存。もしボタンを使う場合は別途処理が必要です）
   let memoTimeout;
   document.getElementById("detail-project-memo").oninput = (e) => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
     if (!project) return;
     project.memo = e.target.value;
     
-    // キーボード入力のたびに保存すると重いので、入力が止まって0.5秒後にFirebaseへ自動保存（デバウンス処理）
     clearTimeout(memoTimeout);
     memoTimeout = setTimeout(async () => {
       await syncToFirebase();
     }, 500);
   };
+  
+  // HTML側にある「メモ保存」ボタン（save-project-memo-btn）を押したときも即時保存するように補強
+  document.getElementById("save-project-memo-btn").onclick = async () => {
+    const project = state.projects.find(p => p.id === state.selectedProjectId);
+    if (!project) return;
+    project.memo = document.getElementById("detail-project-memo").value;
+    await syncToFirebase();
+    alert("メモを保存しました。");
+  };
 
-  // GoogleNoteURL編集
-  document.getElementById("edit-gnote-btn").onclick = async () => {
+  // GoogleNoteURL編集（HTMLのIDに合わせて -url-btn に修正）
+  document.getElementById("edit-gnote-url-btn").onclick = async () => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
     if (!project) return;
 
@@ -153,12 +180,12 @@ function setupEvents() {
     if (url === null) return;
 
     project.gnoteUrl = url.trim();
-    await syncToFirebase(); // Firebaseに即時保存
+    await syncToFirebase();
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
-  // GoogleDriveURL編集
-  document.getElementById("edit-gdrive-btn").onclick = async () => {
+  // GoogleDriveURL編集（HTMLのIDに合わせて -url-btn に修正）
+  document.getElementById("edit-gdrive-url-btn").onclick = async () => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
     if (!project) return;
 
@@ -166,7 +193,7 @@ function setupEvents() {
     if (url === null) return;
 
     project.gdriveUrl = url.trim();
-    await syncToFirebase(); // Firebaseに即時保存
+    await syncToFirebase();
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
