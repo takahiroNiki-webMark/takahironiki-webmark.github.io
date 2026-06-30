@@ -10,14 +10,14 @@ import {
   deleteTask,
   createProject,
   createTask
-} from "https://takahironiki-webmark.github.io/pkandb/js/state.js";
+} from "https://takahironiki-webmark.github.io/pkandb/js/state.js"; // 👈 URLを pkandb に修正しました
 
 import {
   dom,
   initDom,
   renderProjectList,
   renderDetail
-} from "https://takahironiki-webmark.github.io/pkandb/js/ui.js";
+} from "https://takahironiki-webmark.github.io/pkandb/js/ui.js"; // 👈 URLを pkandb に修正しました
 
 async function init() {
   await loadData();
@@ -29,107 +29,107 @@ async function init() {
   setupEvents();
 }
 
-function moveProjectHandler(from, to) {
-  moveProject(from, to);
+// 💡 各ハンドラーを async/await に対応させ、保存が終わってから再描画
+async function moveProjectHandler(from, to) {
+  await moveProject(from, to);
   renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
 }
 
-function selectProjectHandler(id) {
-  selectProject(id);
+async function selectProjectHandler(id) {
+  await selectProject(id);
   renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
 }
 
-function deleteProjectHandler(id) {
-  deleteProject(id);
+async function deleteProjectHandler(id) {
+  if (!confirm("本当にこのプロジェクトを削除しますか？")) return;
+  await deleteProject(id);
   renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
   renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
 }
 
-function moveTaskHandler(projectId, from, to) {
-  moveTask(projectId, from, to);
+async function moveTaskHandler(projectId, from, to) {
+  await moveTask(projectId, from, to);
   renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
 }
 
-function editTaskHandler(projectId, taskId) {
-  const modal = document.getElementById("task-edit-modal");
-  modal.style.display = "flex";
-
+async function editTaskHandler(projectId, taskId) {
   const project = state.projects.find(p => p.id === projectId);
   const task = project.tasks.find(t => t.id === taskId);
+  if (!task) return;
 
-  document.getElementById("edit-task-due").value = task.due || "";
-  document.getElementById("edit-task-title").value = task.title || "";
-  document.getElementById("edit-task-detail").value = task.detail || "";
-  document.getElementById("edit-task-status").value = task.status || "未着手";
-  document.getElementById("edit-task-assignee").value = task.assignee || "";
-  document.getElementById("edit-task-creator").value = task.creator || "";
+  const modal = document.getElementById("task-edit-modal");
+  const dueInput = document.getElementById("edit-task-due");
+  const titleInput = document.getElementById("edit-task-title");
+  const detailInput = document.getElementById("edit-task-detail");
+  const statusSelect = document.getElementById("edit-task-status");
+  const assigneeInput = document.getElementById("edit-task-assignee");
+  const creatorInput = document.getElementById("edit-task-creator");
 
-  document.getElementById("save-task-edit-btn").onclick = () => {
-    updateTask(projectId, taskId, {
-      due: document.getElementById("edit-task-due").value,
-      title: document.getElementById("edit-task-title").value.trim(),
-      detail: document.getElementById("edit-task-detail").value.trim(),
-      status: document.getElementById("edit-task-status").value,
-      assignee: document.getElementById("edit-task-assignee").value.trim(),
-      creator: document.getElementById("edit-task-creator").value.trim()
-    });
+  dueInput.value = task.due || "";
+  titleInput.value = task.title || "";
+  detailInput.value = task.detail || "";
+  statusSelect.value = task.status || "未着手";
+  assigneeInput.value = task.assignee || "";
+  creatorInput.value = task.creator || "";
 
+  modal.style.display = "flex";
+
+  document.getElementById("modal-save-btn").onclick = async () => {
+    const newValues = {
+      due: dueInput.value,
+      title: titleInput.value.trim(),
+      detail: detailInput.value.trim(),
+      status: statusSelect.value,
+      assignee: assigneeInput.value.trim(),
+      creator: creatorInput.value.trim()
+    };
+
+    if (!newValues.title) {
+      alert("課題名/概要は必須です。");
+      return;
+    }
+
+    await updateTask(projectId, taskId, newValues);
     modal.style.display = "none";
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
-  document.getElementById("cancel-task-edit-btn").onclick = () => {
+  document.getElementById("modal-close-btn").onclick = () => {
     modal.style.display = "none";
   };
 }
 
-function deleteTaskHandler(projectId, taskId) {
-  deleteTask(projectId, taskId);
+async function deleteTaskHandler(projectId, taskId) {
+  if (!confirm("本当にこの課題を削除しますか？")) return;
+  await deleteTask(projectId, taskId);
   renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
 }
 
 function setupEvents() {
-  document.getElementById("create-project-btn").onclick = () => {
-    const name = document.getElementById("new-project-name").value.trim();
-    const gnote = document.getElementById("new-project-gnote").value.trim();
-    const gdrive = document.getElementById("new-project-gdrive").value.trim();
+  // プロジェクト新規作成
+  document.getElementById("create-project-btn").onclick = async () => {
+    const nameInput = document.getElementById("new-project-name");
+    const gnoteInput = document.getElementById("new-project-gnote");
+    const gdriveInput = document.getElementById("new-project-gdrive");
 
+    const name = nameInput.value.trim();
     if (!name) {
-      alert("プロジェクト名称は必須です。");
+      alert("案件名称は必須です。");
       return;
     }
 
-    createProject(name, gnote, gdrive);
+    await createProject(name, gnoteInput.value.trim(), gdriveInput.value.trim());
 
-    document.getElementById("new-project-name").value = "";
-    document.getElementById("new-project-gnote").value = "";
-    document.getElementById("new-project-gdrive").value = "";
-
-    renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
-  };
-
-  document.getElementById("edit-project-name-btn").onclick = () => {
-    const project = state.projects.find(p => p.id === state.selectedProjectId);
-    if (!project) return;
-
-    const name = prompt("プロジェクト名称を編集", project.name);
-    if (name === null) return;
-
-    project.name = name.trim() || project.name;
+    nameInput.value = "";
+    gnoteInput.value = "";
+    gdriveInput.value = "";
 
     renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
-  document.getElementById("save-project-memo-btn").onclick = () => {
-    const project = state.projects.find(p => p.id === state.selectedProjectId);
-    if (!project) return;
-
-    project.memo = document.getElementById("detail-project-memo").value;
-    alert("メモを保存しました。（仮）");
-  };
-
-  document.getElementById("edit-gnote-url-btn").onclick = () => {
+  // GoogleNoteURL編集
+  document.getElementById("edit-gnote-btn").onclick = async () => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
     if (!project) return;
 
@@ -140,7 +140,8 @@ function setupEvents() {
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
-  document.getElementById("edit-gdrive-url-btn").onclick = () => {
+  // GoogleDriveURL編集
+  document.getElementById("edit-gdrive-btn").onclick = async () => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
     if (!project) return;
 
@@ -151,7 +152,8 @@ function setupEvents() {
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
-  document.getElementById("create-task-btn").onclick = () => {
+  // 課題（タスク）新規作成
+  document.getElementById("create-task-btn").onclick = async () => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
     if (!project) {
       alert("プロジェクトを選択してください。");
@@ -172,12 +174,11 @@ function setupEvents() {
       return;
     }
 
-    createTask(project.id, taskData);
+    await createTask(project.id, taskData);
 
     document.getElementById("new-task-due").value = "";
     document.getElementById("new-task-title").value = "";
     document.getElementById("new-task-detail").value = "";
-    document.getElementById("new-task-status").value = "未着手";
     document.getElementById("new-task-assignee").value = "";
     document.getElementById("new-task-creator").value = "";
 
@@ -185,4 +186,5 @@ function setupEvents() {
   };
 }
 
+// 起動
 init();
