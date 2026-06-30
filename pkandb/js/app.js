@@ -10,7 +10,7 @@ import {
   deleteTask,
   createProject,
   createTask,
-  syncToFirebase // 手動保存用
+  syncToFirebase
 } from "https://takahironiki-webmark.github.io/pkandb/js/state.js";
 
 import {
@@ -23,80 +23,87 @@ import {
 async function init() {
   await loadData();
   initDom();
-
-  renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
-  renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
-
+  doRender();
   setupEvents();
 }
 
+// 画面全体の再描画をまとめる関数
+function doRender() {
+  renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
+  renderDetail(
+    moveTaskHandler,
+    editTaskHandler,
+    deleteTaskHandler,
+    editProjectNameHandler,
+    editGnoteUrlHandler,
+    editGdriveUrlHandler
+  );
+}
+
+/* ──── ハンドラー関数群 ──── */
 async function moveProjectHandler(from, to) {
   await moveProject(from, to);
-  renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
+  doRender();
 }
 
 async function selectProjectHandler(id) {
   await selectProject(id);
-  renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
-  renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
+  doRender();
 }
 
 async function deleteProjectHandler(id) {
   if (!confirm("本当にこのプロジェクトを削除しますか？")) return;
   await deleteProject(id);
-  renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
-  renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
+  doRender();
+  alert("プロジェクトを削除しました。");
 }
 
 async function moveTaskHandler(projectId, from, to) {
   await moveTask(projectId, from, to);
-  renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
+  doRender();
 }
 
+// 💡 課題編集モーダルを開く処理
 async function editTaskHandler(projectId, taskId) {
   const project = state.projects.find(p => p.id === projectId);
+  if (!project || !project.tasks) return;
   const task = project.tasks.find(t => t.id === taskId);
   if (!task) return;
 
   const modal = document.getElementById("task-edit-modal");
-  const dueInput = document.getElementById("edit-task-due");
-  const titleInput = document.getElementById("edit-task-title");
-  const detailInput = document.getElementById("edit-task-detail");
-  const statusSelect = document.getElementById("edit-task-status");
-  const assigneeInput = document.getElementById("edit-task-assignee");
-  const creatorInput = document.getElementById("edit-task-creator");
-
-  dueInput.value = task.due || "";
-  titleInput.value = task.title || "";
-  detailInput.value = task.detail || "";
-  statusSelect.value = task.status || "未着手";
-  assigneeInput.value = task.assignee || "";
-  creatorInput.value = task.creator || "";
+  document.getElementById("edit-task-due").value = task.due || "";
+  document.getElementById("edit-task-title").value = task.title || "";
+  document.getElementById("edit-task-detail").value = task.detail || "";
+  document.getElementById("edit-task-status").value = task.status || "未着手";
+  document.getElementById("edit-task-assignee").value = task.assignee || "";
+  document.getElementById("edit-task-creator").value = task.creator || "";
 
   modal.style.display = "flex";
 
-  // HTMLのID「save-task-edit-btn」に合わせて修正
+  // モーダル内の保存ボタン
   document.getElementById("save-task-edit-btn").onclick = async () => {
-    const newValues = {
-      due: dueInput.value,
-      title: titleInput.value.trim(),
-      detail: detailInput.value.trim(),
-      status: statusSelect.value,
-      assignee: assigneeInput.value.trim(),
-      creator: creatorInput.value.trim()
-    };
-
-    if (!newValues.title) {
+    const title = document.getElementById("edit-task-title").value.trim();
+    if (!title) {
       alert("課題名/概要は必須です。");
       return;
     }
 
+    const newValues = {
+      due: document.getElementById("edit-task-due").value,
+      title: title,
+      detail: document.getElementById("edit-task-detail").value.trim(),
+      status: document.getElementById("edit-task-status").value,
+      assignee: document.getElementById("edit-task-assignee").value.trim(),
+      creator: document.getElementById("edit-task-creator").value.trim()
+    };
+
     await updateTask(projectId, taskId, newValues);
     modal.style.display = "none";
-    renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
+    doRender();
+    alert("課題を更新しました！");
   };
 
-  // HTMLのID「cancel-task-edit-btn」に合わせて修正
+  // モーダル内のキャンセルボタン
   document.getElementById("cancel-task-edit-btn").onclick = () => {
     modal.style.display = "none";
   };
@@ -105,11 +112,60 @@ async function editTaskHandler(projectId, taskId) {
 async function deleteTaskHandler(projectId, taskId) {
   if (!confirm("本当にこの課題を削除しますか？")) return;
   await deleteTask(projectId, taskId);
-  renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
+  doRender();
+  alert("課題を削除しました。");
 }
 
+// プロジェクト名編集ポップアップ
+async function editProjectNameHandler() {
+  const project = state.projects.find(p => p.id === state.selectedProjectId);
+  if (!project) return;
+
+  const newName = prompt("プロジェクト名称を変更してください", project.name || "");
+  if (newName === null) return; 
+  if (!newName.trim()) {
+    alert("プロジェクト名称は空にできません。");
+    return;
+  }
+
+  project.name = newName.trim();
+  await syncToFirebase();
+  doRender();
+  alert("プロジェクト名称を変更しました！");
+}
+
+// GoogleNoteBookLM URL編集ポップアップ
+async function editGnoteUrlHandler() {
+  const project = state.projects.find(p => p.id === state.selectedProjectId);
+  if (!project) return;
+
+  const newUrl = prompt("GoogleNoteBookLMのURLを編集してください", project.gnoteUrl || "");
+  if (newUrl === null) return;
+
+  project.gnoteUrl = newUrl.trim();
+  await syncToFirebase();
+  doRender();
+  alert("GoogleNoteBookLMのURLを更新しました！");
+}
+
+// GoogleDrive URL編集ポップアップ
+async function editGdriveUrlHandler() {
+  const project = state.projects.find(p => p.id === state.selectedProjectId);
+  if (!project) return;
+
+  const newUrl = prompt("GoogleDriveフォルダのURLを編集してください", project.gdriveUrl || "");
+  if (newUrl === null) return;
+
+  project.gdriveUrl = newUrl.trim();
+  await syncToFirebase();
+  doRender();
+  alert("GoogleDriveのURLを更新しました！");
+}
+
+
+/* ──── イベント初期設定 ──── */
 function setupEvents() {
-  // プロジェクト新規作成
+  // 新規プロジェクト作成
   document.getElementById("create-project-btn").onclick = async () => {
     const nameInput = document.getElementById("new-project-name");
     const gnoteInput = document.getElementById("new-project-gnote");
@@ -127,29 +183,20 @@ function setupEvents() {
     gnoteInput.value = "";
     gdriveInput.value = "";
 
-    renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
-    renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
+    doRender();
+    alert("新規プロジェクトを作成しました！");
   };
 
-  // プロジェクト名称の編集を追加（未実装だった部分）
-  document.getElementById("edit-project-name-btn").onclick = async () => {
+  // メモ保存ボタン（手動）
+  document.getElementById("save-project-memo-btn").onclick = async () => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
     if (!project) return;
-
-    const newName = prompt("プロジェクト名称を変更", project.name || "");
-    if (newName === null) return;
-    if (!newName.trim()) {
-      alert("名称を入力してください。");
-      return;
-    }
-
-    project.name = newName.trim();
+    project.memo = document.getElementById("detail-project-memo").value;
     await syncToFirebase();
-    renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
-    renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
+    alert("メモをFirebaseに保存しました！");
   };
 
-  // メモ欄のリアルタイム保存（※「メモ保存」ボタンを使用しない自動保存。もしボタンを使う場合は別途処理が必要です）
+  // メモ欄のタイピング自動保存（念のため残す・通知なし）
   let memoTimeout;
   document.getElementById("detail-project-memo").oninput = (e) => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
@@ -161,73 +208,42 @@ function setupEvents() {
       await syncToFirebase();
     }, 500);
   };
-  
-  // HTML側にある「メモ保存」ボタン（save-project-memo-btn）を押したときも即時保存するように補強
-  document.getElementById("save-project-memo-btn").onclick = async () => {
-    const project = state.projects.find(p => p.id === state.selectedProjectId);
-    if (!project) return;
-    project.memo = document.getElementById("detail-project-memo").value;
-    await syncToFirebase();
-    alert("メモを保存しました。");
-  };
 
-  // GoogleNoteURL編集（HTMLのIDに合わせて -url-btn に修正）
-  document.getElementById("edit-gnote-url-btn").onclick = async () => {
-    const project = state.projects.find(p => p.id === state.selectedProjectId);
-    if (!project) return;
-
-    const url = prompt("GoogleNoteBookLMのURLを編集", project.gnoteUrl || "");
-    if (url === null) return;
-
-    project.gnoteUrl = url.trim();
-    await syncToFirebase();
-    renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
-  };
-
-  // GoogleDriveURL編集（HTMLのIDに合わせて -url-btn に修正）
-  document.getElementById("edit-gdrive-url-btn").onclick = async () => {
-    const project = state.projects.find(p => p.id === state.selectedProjectId);
-    if (!project) return;
-
-    const url = prompt("GoogleDriveフォルダのURLを編集", project.gdriveUrl || "");
-    if (url === null) return;
-
-    project.gdriveUrl = url.trim();
-    await syncToFirebase();
-    renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
-  };
-
-  // 課題（タスク）新規作成
+  // 課題の新規作成
   document.getElementById("create-task-btn").onclick = async () => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
     if (!project) {
-      alert("プロジェクトを選択してください。");
+      alert("右側の詳細画面が表示されている（プロジェクトが選択されている）状態で作成してください。");
+      return;
+    }
+
+    const titleInput = document.getElementById("new-task-title");
+    const title = titleInput.value.trim();
+    if (!title) {
+      alert("課題名もしくは概要は必須です。");
       return;
     }
 
     const taskData = {
       due: document.getElementById("new-task-due").value,
-      title: document.getElementById("new-task-title").value.trim(),
+      title: title,
       detail: document.getElementById("new-task-detail").value.trim(),
       status: document.getElementById("new-task-status").value,
       assignee: document.getElementById("new-task-assignee").value.trim(),
       creator: document.getElementById("new-task-creator").value.trim()
     };
 
-    if (!taskData.title) {
-      alert("課題名/概要は必須です。");
-      return;
-    }
-
     await createTask(project.id, taskData);
 
+    // 入力欄をクリア
     document.getElementById("new-task-due").value = "";
-    document.getElementById("new-task-title").value = "";
+    titleInput.value = "";
     document.getElementById("new-task-detail").value = "";
     document.getElementById("new-task-assignee").value = "";
     document.getElementById("new-task-creator").value = "";
 
-    renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
+    doRender();
+    alert("新規課題を追加しました！");
   };
 }
 
