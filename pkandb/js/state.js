@@ -1,4 +1,4 @@
-// state.js
+// js/state.js
 
 const firebaseConfig = {
   databaseURL: "https://pkandb-8bfb4-default-rtdb.firebaseio.com/"
@@ -20,7 +20,6 @@ export async function loadData() {
   const data = snapshot.val();
 
   if (data) {
-    // projects の読み込みとnull除去
     if (Array.isArray(data.projects)) {
       state.projects = data.projects.filter(p => p !== null);
     } else if (data.projects && typeof data.projects === 'object') {
@@ -29,7 +28,6 @@ export async function loadData() {
       state.projects = [];
     }
 
-    // 各プロジェクト内の tasks のnull除去
     state.projects.forEach(project => {
       if (!project.tasks) {
         project.tasks = [];
@@ -43,11 +41,21 @@ export async function loadData() {
     state.projects = [];
   }
   
-  // 💡 初期表示で勝手に選択されるのを防ぐため、読み込み直後は必ずnull（未選択）にする
   state.selectedProjectId = null;
 }
 
-// Firebaseへのデータ同期（選択状態IDは保存せず、プロジェクトデータのみをクリーンに保存）
+// 💡 衝突検知用：Firebase上にある特定のプロジェクトの「最新のデータ」を直接1件取得する
+export async function getLatestProject(projectId) {
+  // state.projects 配列の中のインデックスを探す
+  const index = state.projects.findIndex(p => p.id === projectId);
+  if (index === -1) return null;
+
+  // Firebase上の該当するインデックスの場所をピンポイントで読み取る
+  const snapshot = await db.ref(`pkan_data/projects/${index}`).once("value");
+  return snapshot.val();
+}
+
+// Firebaseへのデータ同期
 export async function syncToFirebase() {
   await db.ref("pkan_data").set({
     projects: state.projects
@@ -64,7 +72,6 @@ export async function moveProject(fromIndex, toIndex) {
 
 export async function selectProject(id) {
   state.selectedProjectId = id;
-  // 選択切り替え時はFirebaseに保存しない（ローカル状態として保持）
 }
 
 export async function deleteProject(id) {
@@ -82,6 +89,7 @@ export async function createProject(name, gnoteUrl, gdriveUrl) {
     gnoteUrl,
     gdriveUrl,
     memo: "",
+    updatedAt: Date.now(), // 💡 初期作成時のタイムスタンプ
     tasks: []
   });
   state.selectedProjectId = newId;
@@ -96,6 +104,8 @@ export async function moveTask(projectId, fromIndex, toIndex) {
 
   const [t] = project.tasks.splice(fromIndex, 1);
   project.tasks.splice(toIndex, 0, t);
+  
+  project.updatedAt = Date.now(); // 💡 タスク並び替え時も更新時間を進める
   await syncToFirebase();
 }
 
@@ -105,6 +115,8 @@ export async function updateTask(projectId, taskId, newValues) {
   const task = project.tasks.find(t => t.id === taskId);
   if (!task) return;
   Object.assign(task, newValues);
+  
+  project.updatedAt = Date.now(); // 💡 タスク編集時も更新時間を進める
   await syncToFirebase();
 }
 
@@ -112,6 +124,8 @@ export async function deleteTask(projectId, taskId) {
   const project = state.projects.find(p => p.id === projectId);
   if (!project) return;
   project.tasks = project.tasks.filter(t => t.id !== taskId);
+  
+  project.updatedAt = Date.now(); // 💡 タスク削除時も更新時間を進める
   await syncToFirebase();
 }
 
@@ -125,5 +139,7 @@ export async function createTask(projectId, taskData) {
     id: newId,
     ...taskData
   });
+  
+  project.updatedAt = Date.now(); // 💡 タスク追加時も更新時間を進める
   await syncToFirebase();
 }
