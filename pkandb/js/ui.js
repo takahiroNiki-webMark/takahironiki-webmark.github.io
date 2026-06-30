@@ -1,5 +1,5 @@
-// ui.js
-import { state } from "https://takahironiki-webmark.github.io/pkandb/js/state.js";
+// js/ui.js
+import { state } from "./state.js"; // 💡 修正：同じフォルダの state.js を読み込む
 
 export const dom = {};
 
