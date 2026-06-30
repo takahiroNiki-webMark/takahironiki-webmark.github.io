@@ -9,15 +9,16 @@ import {
   updateTask,
   deleteTask,
   createProject,
-  createTask
-} from "https://takahironiki-webmark.github.io/pkandb/js/state.js"; // 👈 URLを pkandb に修正しました
+  createTask,
+  syncToFirebase // 💡 手動保存用に追加
+} from "https://takahironiki-webmark.github.io/pkandb/js/state.js";
 
 import {
   dom,
   initDom,
   renderProjectList,
   renderDetail
-} from "https://takahironiki-webmark.github.io/pkandb/js/ui.js"; // 👈 URLを pkandb に修正しました
+} from "https://takahironiki-webmark.github.io/pkandb/js/ui.js";
 
 async function init() {
   await loadData();
@@ -29,7 +30,6 @@ async function init() {
   setupEvents();
 }
 
-// 💡 各ハンドラーを async/await に対応させ、保存が終わってから再描画
 async function moveProjectHandler(from, to) {
   await moveProject(from, to);
   renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
@@ -37,6 +37,8 @@ async function moveProjectHandler(from, to) {
 
 async function selectProjectHandler(id) {
   await selectProject(id);
+  // プロジェクトを切り替えたので、一覧側（選択ハイライト用）と詳細側の両方を再描画
+  renderProjectList(moveProjectHandler, selectProjectHandler, deleteProjectHandler);
   renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
 }
 
@@ -128,6 +130,20 @@ function setupEvents() {
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
+  // メモ欄のリアルタイム保存
+  let memoTimeout;
+  document.getElementById("detail-project-memo").oninput = (e) => {
+    const project = state.projects.find(p => p.id === state.selectedProjectId);
+    if (!project) return;
+    project.memo = e.target.value;
+    
+    // キーボード入力のたびに保存すると重いので、入力が止まって0.5秒後にFirebaseへ自動保存（デバウンス処理）
+    clearTimeout(memoTimeout);
+    memoTimeout = setTimeout(async () => {
+      await syncToFirebase();
+    }, 500);
+  };
+
   // GoogleNoteURL編集
   document.getElementById("edit-gnote-btn").onclick = async () => {
     const project = state.projects.find(p => p.id === state.selectedProjectId);
@@ -137,6 +153,7 @@ function setupEvents() {
     if (url === null) return;
 
     project.gnoteUrl = url.trim();
+    await syncToFirebase(); // Firebaseに即時保存
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
@@ -149,6 +166,7 @@ function setupEvents() {
     if (url === null) return;
 
     project.gdriveUrl = url.trim();
+    await syncToFirebase(); // Firebaseに即時保存
     renderDetail(moveTaskHandler, editTaskHandler, deleteTaskHandler);
   };
 
@@ -186,5 +204,4 @@ function setupEvents() {
   };
 }
 
-// 起動
 init();
