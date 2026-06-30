@@ -14,7 +14,7 @@ export const state = {
   selectedProjectId: null
 };
 
-// Firebaseからデータを読み込む（配列・オブジェクトの両方に対応する超強力版）
+// Firebaseからデータを読み込む
 export async function loadData() {
   const snapshot = await db.ref("pkan_data").once("value");
   const data = snapshot.val();
@@ -39,19 +39,18 @@ export async function loadData() {
         project.tasks = Object.values(project.tasks);
       }
     });
-
-    state.selectedProjectId = data.selectedProjectId || null;
   } else {
     state.projects = [];
-    state.selectedProjectId = null;
   }
+  
+  // 💡 初期表示で勝手に選択されるのを防ぐため、読み込み直後は必ずnull（未選択）にする
+  state.selectedProjectId = null;
 }
 
-// 💡 外部からでも手動保存できるように export をつけました
+// Firebaseへのデータ同期（選択状態IDは保存せず、プロジェクトデータのみをクリーンに保存）
 export async function syncToFirebase() {
   await db.ref("pkan_data").set({
-    projects: state.projects,
-    selectedProjectId: state.selectedProjectId
+    projects: state.projects
   });
 }
 
@@ -65,7 +64,7 @@ export async function moveProject(fromIndex, toIndex) {
 
 export async function selectProject(id) {
   state.selectedProjectId = id;
-  await syncToFirebase();
+  // 選択切り替え時はFirebaseに保存しない（ローカル状態として保持）
 }
 
 export async function deleteProject(id) {
@@ -75,7 +74,6 @@ export async function deleteProject(id) {
 }
 
 export async function createProject(name, gnoteUrl, gdriveUrl) {
-  // IDをタイムスタンプ文字列にして自動配列化を防ぐ
   const newId = "p_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
 
   state.projects.push({
