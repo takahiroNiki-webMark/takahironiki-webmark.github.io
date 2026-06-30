@@ -10,20 +10,22 @@ import {
   deleteTask,
   createProject,
   createTask,
-  syncToFirebase
-} from "./state.js"; // 💡 修正：同じフォルダの state.js を読み込む
+  syncToFirebase,
+  getLatestProject // 💡 追加
+} from "./state.js";
 
 import {
   dom,
   initDom,
   renderProjectList,
   renderDetail
-} from "./ui.js"; // 💡 修正：同じフォルダの ui.js を読み込む
+} from "./ui.js";
+
+// 💡 ユーザーが詳細画面を開いた瞬間の、そのプロジェクトの更新日時を記憶する変数
+let projectOpenedAt = null;
 
 async function init() {
   await loadData();
-  
-  // 初期表示時は必ず未選択にする
   state.selectedProjectId = null;
 
   initDom();
@@ -43,6 +45,20 @@ function doRender() {
   );
 }
 
+// 💡 保存処理の直前に、他人に更新されていないかを一括チェックする共通の防衛関数
+async function checkCollision() {
+  if (!state.selectedProjectId) return true; // 未選択ならチェック不要
+
+  const latestProject = await getLatestProject(state.selectedProjectId);
+  
+  // Firebase側にデータがあり、かつその更新日時が、自分が「開いた時の日時」より新しくなっていたら衝突発生！
+  if (latestProject && latestProject.updatedAt && projectOpenedAt && latestProject.updatedAt > projectOpenedAt) {
+    alert("⚠️ 衝突検知：あなたがこのプロジェクトを開いた後に、別のユーザー（または別ブラウザ）が内容を更新しました。\n\nデータの変更内容が消えてしまうのを防ぐため、保存を中断しました。一度画面をリロードして最新のデータを確認してください。");
+    return false; // ✕ 危険（保存してはいけない）
+  }
+  return true; // ◯ 安全（保存してOK）
+}
+
 /* ──── ハンドラー関数群 ──── */
 async function moveProjectHandler(from, to) {
   await moveProject(from, to);
@@ -51,6 +67,11 @@ async function moveProjectHandler(from, to) {
 
 async function selectProjectHandler(id) {
   await selectProject(id);
+  const project = state.projects.find(p => p.id === id);
+  
+  // 💡 詳細画面を開いた瞬間のタイムスタンプを記憶する
+  projectOpenedAt = project ? (project.updatedAt || null) : null;
+  
   doRender();
 }
 
@@ -62,7 +83,15 @@ async function deleteProjectHandler(id) {
 }
 
 async function moveTaskHandler(projectId, from, to) {
+  // タスク並び替え時も衝突を検知
+  if (!(await checkCollision())) return;
+
   await moveTask(projectId, from, to);
+  
+  // 保存に成功したので、自分の開いた時間を最新にする
+  const project = state.projects.find(p => p.id === projectId);
+  if (project) projectOpenedAt = project.updatedAt;
+
   doRender();
 }
 
@@ -85,6 +114,12 @@ async function editTaskHandler(projectId, taskId) {
 
   // モーダル内「保存」
   document.getElementById("save-task-edit-btn").onclick = async () => {
+    // 💡 保存する瞬間に衝突チェック
+    if (!(await checkCollision())) {
+      modal.style.display = "none";
+      return;
+    }
+
     const title = document.getElementById("edit-task-title").value.trim();
     if (!title) {
       alert("課題名/概要は必須です。");
@@ -101,6 +136,10 @@ async function editTaskHandler(projectId, taskId) {
     };
 
     await updateTask(projectId, taskId, newValues);
+    
+    // 開いた時間を最新化
+    projectOpenedAt = project.updatedAt;
+
     modal.style.display = "none";
     doRender();
     alert("課題を更新しました！");
@@ -114,7 +153,15 @@ async function editTaskHandler(projectId, taskId) {
 
 async function deleteTaskHandler(projectId, taskId) {
   if (!confirm("本当にこの課題を削除しますか？")) return;
+  
+  // 💡 削除時も衝突チェック
+  if (!(await checkCollision())) return;
+
   await deleteTask(projectId, taskId);
+  
+  const project = state.projects.find(p => p.id === projectId);
+  if (project) projectOpenedAt = project.updatedAt;
+
   doRender();
   alert("課題を削除しました。");
 }
@@ -124,6 +171,9 @@ async function editProjectNameHandler() {
   const project = state.projects.find(p => p.id === state.selectedProjectId);
   if (!project) return;
 
+  // 💡 編集開始直前に衝突チェック
+  if (!(await checkCollision())) return;
+
   const newName = prompt("プロジェクト名称を変更してください", project.name || "");
   if (newName === null) return; 
   if (!newName.trim()) {
@@ -132,7 +182,10 @@ async function editProjectNameHandler() {
   }
 
   project.name = newName.trim();
+  project.updatedAt = Date.now(); // タイムスタンプ更新
   await syncToFirebase();
+  
+  projectOpenedAt = project.updatedAt;
   doRender();
   alert("プロジェクト名称を変更しました！");
 }
@@ -142,11 +195,16 @@ async function editGnoteUrlHandler() {
   const project = state.projects.find(p => p.id === state.selectedProjectId);
   if (!project) return;
 
+  if (!(await checkCollision())) return;
+
   const newUrl = prompt("GoogleNoteBookLMのURLを編集してください", project.gnoteUrl || "");
   if (newUrl === null) return;
 
   project.gnoteUrl = newUrl.trim();
+  project.updatedAt = Date.now();
   await syncToFirebase();
+  
+  projectOpenedAt = project.updatedAt;
   doRender();
   alert("GoogleNoteBookLMのURLを更新しました！");
 }
@@ -156,11 +214,16 @@ async function editGdriveUrlHandler() {
   const project = state.projects.find(p => p.id === state.selectedProjectId);
   if (!project) return;
 
+  if (!(await checkCollision())) return;
+
   const newUrl = prompt("GoogleDriveフォルダのURLを編集してください", project.gdriveUrl || "");
   if (newUrl === null) return;
 
   project.gdriveUrl = newUrl.trim();
+  project.updatedAt = Date.now();
   await syncToFirebase();
+  
+  projectOpenedAt = project.updatedAt;
   doRender();
   alert("GoogleDriveのURLを更新しました！");
 }
@@ -181,6 +244,10 @@ function setupEvents() {
 
     await createProject(name, gnoteInput.value.trim(), gdriveInput.value.trim());
 
+    // 新規作成して自動で詳細を開いたので、そのプロジェクトの作成日時を開いた日時とする
+    const project = state.projects.find(p => p.id === state.selectedProjectId);
+    projectOpenedAt = project ? project.updatedAt : null;
+
     nameInput.value = "";
     gnoteInput.value = "";
     gdriveInput.value = "";
@@ -196,23 +263,20 @@ function setupEvents() {
       alert("プロジェクトが選択されていません。一覧から詳細を開いてください。");
       return;
     }
+
+    // 💡 保存する瞬間に衝突チェック
+    if (!(await checkCollision())) return;
+
     project.memo = document.getElementById("detail-project-memo").value;
+    project.updatedAt = Date.now(); // タイムスタンプ更新
+
     await syncToFirebase();
+    projectOpenedAt = project.updatedAt; // 自分の開いた時間を最新にする
     alert("メモをFirebaseに保存しました！");
   };
 
-  // メモ欄の自動保存
-  let memoTimeout;
-  document.getElementById("detail-project-memo").oninput = (e) => {
-    const project = state.projects.find(p => p.id === state.selectedProjectId);
-    if (!project) return;
-    project.memo = e.target.value;
-    
-    clearTimeout(memoTimeout);
-    memoTimeout = setTimeout(async () => {
-      await syncToFirebase();
-    }, 500);
-  };
+  // ※メモ欄の自動保存（oninput）機能は衝突防止のため一旦安全にスキップ（または手動保存に一本化）します
+  // 複数人同時編集環境下での文字入力中の自動上書きを防ぐため、上記「メモ保存」ボタンでの保存を推奨します。
 
   // 課題の新規作成
   document.getElementById("create-task-btn").onclick = async () => {
@@ -221,6 +285,9 @@ function setupEvents() {
       alert("プロジェクトを選択した状態で作成してください。");
       return;
     }
+
+    // 💡 保存する瞬間に衝突チェック
+    if (!(await checkCollision())) return;
 
     const titleInput = document.getElementById("new-task-title");
     const title = titleInput.value.trim();
@@ -239,6 +306,9 @@ function setupEvents() {
     };
 
     await createTask(project.id, taskData);
+    
+    // 開いた時間を最新化
+    projectOpenedAt = project.updatedAt;
 
     document.getElementById("new-task-due").value = "";
     titleInput.value = "";
