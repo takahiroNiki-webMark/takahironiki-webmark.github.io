@@ -2,6 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<!-- モバイル対応（SP対応）のためのビューポート設定を追加 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DICOMサーバ／院内Webビューア導入サービス</title>
 <style>
   * {
@@ -36,6 +38,8 @@
     font-size: 14px;
     color: #555;
     margin-top: 4px;
+    /* スマホで文字が詰まらないよう少し調整 */
+    line-height: 1.5; 
   }
   .section {
     margin-top: 18px;
@@ -58,6 +62,7 @@
     padding: 8px 10px;
     margin: 8px 0 10px;
     font-size: 13px;
+    line-height: 1.6;
   }
   .viewer-list {
     display: flex;
@@ -66,17 +71,24 @@
     flex-wrap: wrap;
   }
   .viewer-card {
-    flex: 1 1 240px;
+    /* 幅が狭まったら自然に100%になるよう設定 */
+    flex: 1 1 calc(50% - 6px);
+    min-width: 260px;
     border: 1px solid #dde2ea;
     border-radius: 6px;
-    padding: 10px;
+    padding: 12px;
     font-size: 13px;
     background: #fafbff;
   }
   .viewer-card h4 {
     font-size: 14px;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     color: #1f3b6f;
+    /* タグの折り返しに対応 */
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
   }
   .viewer-tag {
     display: inline-block;
@@ -85,16 +97,17 @@
     background: #2b7cff;
     padding: 2px 6px;
     border-radius: 4px;
-    margin-left: 6px;
+    white-space: nowrap;
   }
   ul {
-    margin-left: 16px;
+    margin-left: 20px;
     margin-top: 4px;
     margin-bottom: 4px;
   }
   ul li {
     font-size: 13px;
     line-height: 1.6;
+    margin-bottom: 4px;
   }
   .disclaimer {
     font-size: 11px;
@@ -102,9 +115,15 @@
     color: #555;
     border: 1px dashed #c5ccd8;
     border-radius: 6px;
-    padding: 10px;
+    padding: 12px;
     margin-top: 16px;
     background: #f9fafc;
+  }
+  .disclaimer p {
+    margin-bottom: 10px;
+  }
+  .disclaimer p:last-child {
+    margin-bottom: 0;
   }
   .footer {
     margin-top: 14px;
@@ -112,7 +131,27 @@
     text-align: right;
     color: #777;
   }
-  /* 印刷用ざっくり設定 */
+
+  /* スマートフォン・タブレット向けのレスポンシブ調整 */
+  @media screen and (max-width: 599px) {
+    body {
+      padding: 8px;
+    }
+    .flyer {
+      padding: 16px 16px;
+    }
+    .title h1 {
+      font-size: 18px;
+    }
+    .title h2 {
+      font-size: 12px;
+    }
+    .viewer-card {
+      flex: 1 1 100%;
+    }
+  }
+
+  /* 印刷用設定 */
   @media print {
     body {
       background: #fff;
@@ -131,7 +170,7 @@
 <body>
 <div class="flyer">
   <div class="title">
-    <h1>小規模クリニック・歯科・動物病院向け<br>DICOMサーバ／院内Webビューア導入サービス</h1>
+    <h1>クリニック・歯科・動物病院向けDICOMサーバ／院内Webビューア導入サービス</h1>
     <h2>既存レントゲン・CT環境はそのままに、院内PC・タブレットで医用画像を共有</h2>
   </div>
 
