@@ -535,6 +535,33 @@
       margin: 0 auto;
     }
 
+
+/* PC時のみバナーを横2列表示 */
+@media (min-width:992px){
+
+  .banner-grid{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+    max-width:1900px;
+    margin:0 auto;
+  }
+
+  .banner-grid center{
+    display:block;
+    margin:0;
+    width:calc(50% - 10px);
+  }
+
+  .banner-grid .cool-banner{
+    max-width:100%;
+    width:100%;
+  }
+
+}
+
+
     /* PC時のみ少し小さく */
     @media(min-width:992px) {
 
@@ -848,6 +875,7 @@
         </center>
 
 
+<div class="banner-grid">
         <center style="margin-bottom:20px;">
           <img src="/attack0.png" id="myImage8" class="scroll-effect banner-link-img cool-banner">
         </center>
@@ -860,6 +888,8 @@
         <center style="margin-bottom:20px;">
           <img src="/21hikitsugi.png" id="myImage8" class="scroll-effect banner-link-img cool-banner">
         </center>
+</div>
+
 
 <br /><br /><br /><br />
         
