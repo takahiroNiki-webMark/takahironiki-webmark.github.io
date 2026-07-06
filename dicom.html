@@ -1,1 +1,210 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>DICOMサーバ／院内Webビューア導入サービス</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  body {
+    background: #f5f7fa;
+    color: #222;
+    padding: 16px;
+  }
+  .flyer {
+    max-width: 800px; /* A4縦をざっくり想定 */
+    margin: 0 auto;
+    background: #fff;
+    padding: 24px 28px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.08);
+  }
+  .title {
+    border-left: 6px solid #2b7cff;
+    padding-left: 12px;
+    margin-bottom: 16px;
+  }
+  .title h1 {
+    font-size: 22px;
+    line-height: 1.4;
+  }
+  .title h2 {
+    font-size: 14px;
+    color: #555;
+    margin-top: 4px;
+  }
+  .section {
+    margin-top: 18px;
+  }
+  .section h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #2b3a4a;
+    border-bottom: 1px solid #e0e4ea;
+    padding-bottom: 4px;
+  }
+  .section p {
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 6px;
+  }
+  .highlight {
+    background: #eef5ff;
+    border-left: 4px solid #2b7cff;
+    padding: 8px 10px;
+    margin: 8px 0 10px;
+    font-size: 13px;
+  }
+  .viewer-list {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .viewer-card {
+    flex: 1 1 240px;
+    border: 1px solid #dde2ea;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 13px;
+    background: #fafbff;
+  }
+  .viewer-card h4 {
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: #1f3b6f;
+  }
+  .viewer-tag {
+    display: inline-block;
+    font-size: 11px;
+    color: #fff;
+    background: #2b7cff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+  }
+  ul {
+    margin-left: 16px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  ul li {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .disclaimer {
+    font-size: 11px;
+    line-height: 1.6;
+    color: #555;
+    border: 1px dashed #c5ccd8;
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 16px;
+    background: #f9fafc;
+  }
+  .footer {
+    margin-top: 14px;
+    font-size: 11px;
+    text-align: right;
+    color: #777;
+  }
+  /* 印刷用ざっくり設定 */
+  @media print {
+    body {
+      background: #fff;
+      padding: 0;
+    }
+    .flyer {
+      box-shadow: none;
+      border-radius: 0;
+      max-width: none;
+      width: 100%;
+      padding: 16mm;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="flyer">
+  <div class="title">
+    <h1>小規模クリニック・歯科・動物病院向け<br>DICOMサーバ／院内Webビューア導入サービス</h1>
+    <h2>既存レントゲン・CT環境はそのままに、院内PC・タブレットで医用画像を共有</h2>
+  </div>
+
+  <div class="section">
+    <h3>サービス概要</h3>
+    <p>
+      現在ご使用中のレントゲン・CT撮影環境はそのままに、院内の複数PC・タブレットから医用画像を閲覧できる環境を構築します。
+      オープンソースDICOMサーバ <strong>Orthanc</strong> を採用し、低コストで画像共有・患者様／飼い主様への説明環境を実現します。
+      <br><span style="font-size:11px;">※ライセンス維持費は不要です。</span>
+    </p>
+    <div class="highlight">
+      DICOMサーバは <strong>Windows 11</strong> 上に構築し、医用画像は既存保存フォルダからの自動読込設定を想定しています。
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>選択可能なWeb Viewer</h3>
+    <div class="viewer-list">
+      <div class="viewer-card">
+        <h4>a. Stone Web Viewer<span class="viewer-tag">Orthanc公式／高速</span></h4>
+        <p>CT・MRI・PET対応。高速表示とMPR（多断面再構成）に対応し、シンプルで軽快な操作感です。</p>
+      </div>
+      <div class="viewer-card">
+        <h4>b. OHIF Viewer（MITライセンス）<span class="viewer-tag">人気・高機能</span></h4>
+        <p>
+          CT・MRI・PET・USなど多彩なモダリティに対応。MPR、複数シリーズ比較、計測、Segmentation（領域抽出）、Hanging Protocol（表示レイアウト自動化）、AI連携など、高機能なWebビューアです。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Orthanc（オーサンク）について</h3>
+    <p>
+      Orthancは、2011年にベルギー・リエージュ大学病院の物理学者ジョドニュ博士により開発が開始されたオープンソースDICOMサーバです。
+    </p>
+    <ul>
+      <li>ベルギー・ウォロン地域政府の公的資金支援からスタート</li>
+      <li>2015年、欧州医療賞を受賞し、EUレベルでの公的支援が開始</li>
+      <li>現在は公的病院・大学・大手企業がスポンサーとなり、開発者に給与が支払われる継続開発体制</li>
+    </ul>
+    <p>オープンソースライセンス：<strong>GPLv3</strong></p>
+  </div>
+
+  <div class="section">
+    <h3>免責事項</h3>
+    <div class="disclaimer">
+      <p><strong>医療機器認証について</strong><br>
+        本サービスで導入するOrthancは、日本国内における医薬品医療機器等法（薬機法）上の医療機器認証を取得しておりません。
+        本システムは「患者様・飼い主様への説明・コミュニケーション用」または「参考資料の閲覧用」としてご使用ください。
+        確定診断の際は、必ず認証済みの主システム（モダリティ付属の診断ソフト等）をご利用ください。
+      </p>
+      <p><strong>データバックアップについて</strong><br>
+        本システム内データの消失に関する損害賠償の責任は負いかねます。院内でのバックアップ運用をご検討ください。
+      </p>
+      <p><strong>セキュリティ管理について</strong><br>
+        個人情報漏洩リスクに関する管理責任は、院側の運用管理とさせていただきます。ネットワーク設定・アクセス権限管理など、適切な運用をお願いいたします。
+      </p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <!-- ここに院名・連絡先などを追記 -->
+    2026年 webMark.
+  </div>
+</div>
+
+<script>
+// JSは現状必須機能がないため、将来の拡張用に空で定義しています。
+document.addEventListener("DOMContentLoaded", function () {
+  // 例：後で問い合わせボタンやモーダルを追加する場合に利用
+});
+</script>
+</body>
+</html>
