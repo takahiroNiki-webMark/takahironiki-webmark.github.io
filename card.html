@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebMark QR Code Card</title>
+    <!-- 先進的な Plus Jakarta Sans フォントの読込 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #05070a;
+            /* テック感のある背景ドットパターン */
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* スマホ画面サイズ(9:16)に固定したベースカード */
+        .display-card {
+            width: 100vw;
+            height: 100vh;
+            max-width: 430px; 
+            max-height: 932px; 
+            background: linear-gradient(145deg, #0d1117 0%, #070a0e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 60px 32px 80px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        /* 近未来的でスタイリッシュなネオンフレーム */
+        .display-card::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            border: 1px solid rgba(88, 166, 255, 0.2);
+            border-radius: 20px;
+            pointer-events: none;
+            box-shadow: inset 0 0 20px rgba(88, 166, 255, 0.05);
+        }
+
+        /* 四隅のメカニカルなアクセントコーナー */
+        .display-card::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            border: 2px solid transparent;
+            background: 
+                linear-gradient(to right, #2354c4 20px, transparent 20px) 0 0,
+                linear-gradient(to bottom, #2354c4 20px, transparent 20px) 0 0,
+                linear-gradient(to left, #e41c24 20px, transparent 20px) 100% 0,
+                linear-gradient(to bottom, #e41c24 20px, transparent 20px) 100% 0,
+                linear-gradient(to right, #2354c4 20px, transparent 20px) 0 100%,
+                linear-gradient(to top, #2354c4 20px, transparent 20px) 0 100%,
+                linear-gradient(to left, #e41c24 20px, transparent 20px) 100% 100%,
+                linear-gradient(to top, #e41c24 20px, transparent 20px) 100% 100%;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* 上部ロゴエリア */
+        .logo-box {
+            width: 100%;
+            max-width: 240px;
+            filter: drop-shadow(0 4px 15px rgba(35, 84, 196, 0.3));
+            margin-top: 20px;
+        }
+
+        .logo-img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        /* 中央QRコードエリア */
+        .qr-wrapper {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 24px;
+            box-shadow: 
+                0 10px 40px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* QRコード画像本体 */
+        .qr-img {
+            width: 200px;
+            height: 200px;
+            display: block;
+        }
+
+        /* 下部テキストエリア */
+        .bottom-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .scan-me {
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.4em;
+            color: #58a6ff;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            padding-left: 0.4em; 
+            text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+        }
+
+        .name-sub {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            color: #8b949e;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="display-card">
+        <!-- 上部: オンライン上のWebMarkロゴ -->
+        <div class="logo-box">
+            <img src="https://takahironiki-webmark.github.io/images/webmark-logo.png" alt="WebMark" class="logo-img">
+        </div>
+
+        <!-- 中央: オンライン上のQRコード画像 -->
+        <div class="qr-wrapper">
+            <img src="https://takahironiki-webmark.github.io/frame.png" alt="QR Code" class="qr-img">
+        </div>
+
+        <!-- 下部: ナビゲーションテキスト -->
+        <div class="bottom-info">
+            <p class="scan-me">Scan Me</p>
+            <p class="name-sub">Takahiro Niki</p>
+        </div>
+    </div>
+
+</body>
+</html>
