@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKAHIRO NIKI / 仁木 崇寛 | Profile</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-main: #e6edf3;
+            --text-sub: #8b949e;
+            --accent: #58a6ff;
+            --accent-hover: #1f6feb;
+            --border-color: #30363d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .profile-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 380px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            width: 180px;
+            margin: 0 auto 24px;
+            display: block;
+        }
+
+        .name-en {
+            font-size: 15px;
+            letter-spacing: 0.12em;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .name-ja {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .title {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 28px;
+        }
+
+        .info-list {
+            text-align: left;
+            margin-bottom: 32px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            text-decoration: none;
+            color: var(--text-main);
+            transition: color 0.2s ease, transform 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-item:active {
+            color: var(--accent);
+            transform: translateX(2px);
+        }
+
+        .icon {
+            font-size: 18px;
+            margin-right: 14px;
+            width: 24px;
+            text-align: center;
+            color: var(--text-sub);
+        }
+
+        .info-text {
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .btn-save {
+            display: block;
+            width: 100%;
+            background-color: var(--accent);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.25);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-save:active {
+            background-color: var(--accent-hover);
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(88, 166, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-card">
+        <img src="https://takahironiki-webmark.github.io/webmark-logo.png" alt="WebMark Logo" class="logo">
+
+        <div class="name-en">Takahiro Niki</div>
+        <h1 class="name-ja">仁木 崇寛</h1>
+        <p class="title">Software Developer / ITエンジニア</p>
+
+        <div class="info-list">
+            <a href="tel:090-2170-3258" class="info-item">
+                <span class="icon">📞</span>
+                <span class="info-text">090-2170-3258</span>
+            </a>
+            <a href="mailto:nikitakahiro@gmail.com" class="info-item">
+                <span class="icon">✉</span>
+                <span class="info-text">nikitakahiro@gmail.com</span>
+            </a>
+            <a href="https://takahironiki-webmark.github.io/" target="_blank" rel="noopener" class="info-item">
+                <span class="icon">🌐</span>
+                <span class="info-text">https://takahironiki-webmark.github.io/</span>
+            </a>
+        </div>
+
+        <a id="downloadVCard" href="#" class="btn-save">連絡先を保存</a>
+    </div>
+
+    <script>
+        document.getElementById('downloadVCard').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const vcardData = [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                "FN:仁木 崇寛",
+                "N:仁木;崇寛;;;",
+                "ORG:Software Developer / ITエンジニア",
+                "TEL;TYPE=CELL:090-2170-3258",
+                "EMAIL;TYPE=WORK:nikitakahiro@gmail.com",
+                "URL:https://takahironiki-webmark.github.io/",
+                "END:VCARD"
+            ].join("\n");
+
+            const blob = new Blob(
+                [new Uint8Array([0xEF, 0xBB, 0xBF]), vcardData],
+                { type: "text/vcard;charset=utf-8;" }
+            );
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "takahiro_niki.vcf");
+            document.body.appendChild(link);
+            link.click();
+
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        });
+    </script>
+
+</body>
+</html>
