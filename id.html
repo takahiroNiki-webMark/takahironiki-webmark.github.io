@@ -173,17 +173,17 @@
         document.getElementById('downloadVCard').addEventListener('click', function(e) {
             e.preventDefault();
 
-            const vcardData = [
-                "BEGIN:VCARD",
-                "VERSION:3.0",
-                "FN:仁木 崇寛",
-                "N:仁木;崇寛;;;",
-                "ORG:Software Developer / ITエンジニア",
-                "TEL;TYPE=CELL:090-2170-3258",
-                "EMAIL;TYPE=WORK:nikitakahiro@gmail.com",
-                "URL:https://takahironiki-webmark.github.io/",
-                "END:VCARD"
-            ].join("\n");
+const vcardData = [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    "FN;CHARSET=UTF-8:仁木 崇寛",
+    "N;CHARSET=UTF-8:仁木;崇寛;;;",
+    "ORG;CHARSET=UTF-8:ITエンジニア",
+    "TEL;TYPE=CELL:090-2170-3258",
+    "EMAIL;TYPE=WORK:nikitakahiro@gmail.com",
+    "URL:https://takahironiki-webmark.github.io/",
+    "END:VCARD"
+].join("\r\n");
 
             const blob = new Blob(
                 [new Uint8Array([0xEF, 0xBB, 0xBF]), vcardData],
