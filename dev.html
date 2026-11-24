@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>徒歩配達ルート最適化 v0.2.2 // 住所抽出緩和版</title>
+<title>徒歩配達ルート v0.3 // 印字住所→GMAP即検索＆登録</title>
 <style>
   :root {
     --bg: #0b1020;
@@ -24,10 +24,9 @@
     color: var(--text);
     line-height: 1.5;
   }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 14px; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 14px; }
   h1 { margin: 0 0 4px; font-size: 19px; }
   .sub { margin: 0 0 14px; color: var(--muted); font-size: 12.5px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin-bottom: 14px; }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -35,7 +34,6 @@
     padding: 14px;
     margin-bottom: 14px;
   }
-  .grid .card { margin-bottom: 0; }
   .card h2 {
     margin: 0 0 10px;
     font-size: 15px;
@@ -44,28 +42,22 @@
     justify-content: space-between;
     align-items: center;
   }
-  video {
+  input[type="text"], textarea {
     width: 100%;
-    max-height: 260px;
-    background: #050811;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    display: block;
-    object-fit: cover;
-  }
-  textarea {
-    width: 100%;
-    min-height: 110px;
     background: #080c17;
     color: var(--text);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px;
     font-size: 14px;
-    resize: vertical;
   }
+  textarea { min-height: 76px; resize: vertical; }
   .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  button {
+  button, a.btn-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
     background: #1d3557;
     color: #fff;
     border: 1px solid var(--accent);
@@ -75,8 +67,8 @@
     font-weight: 700;
     cursor: pointer;
   }
-  button:hover { background: #254673; }
-  button.ok { border-color: var(--ok); background: rgba(34, 197, 94, 0.16); color: #86efac; }
+  button:hover, a.btn-link:hover { background: #254673; }
+  button.ok, a.btn-link.ok { border-color: var(--ok); background: rgba(34, 197, 94, 0.16); color: #86efac; }
   button.warn { border-color: var(--warn); background: rgba(245, 158, 11, 0.16); color: #fcd34d; }
   button.err { border-color: var(--err); background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
   .badge {
@@ -88,7 +80,6 @@
   }
   .b-exact { background: rgba(34,197,94,0.2); color: #86efac; }
   .b-town { background: rgba(245,158,11,0.2); color: #fcd34d; }
-  .b-fail { background: rgba(239,68,68,0.2); color: #fca5a5; }
   table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 6px; }
   th, td { border-bottom: 1px solid rgba(148,163,184,0.15); padding: 7px 6px; text-align: left; }
   th { color: var(--muted); font-size: 11px; }
@@ -96,67 +87,37 @@
     font-family: ui-monospace, monospace;
     font-size: 11.5px;
     color: var(--muted);
-    max-height: 120px;
+    max-height: 110px;
     overflow-y: auto;
     background: #080c17;
     padding: 8px;
     border-radius: 6px;
     margin-top: 10px;
   }
-  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>徒歩配達ルート最適化 v0.2.2 — 住所抽出緩和版</h1>
-  <p class="sub">貼り付けテキストの抽出条件を緩め、氏名・住所・郵便番号を座標変換後に破棄するプロトタイプです。</p>
+  <h1>徒歩配達ルート v0.3 — 印字住所 → GMAP即検索＆登録</h1>
+  <p class="sub">封筒1件の印字住所を貼り付けてGoogleマップで即確認し、登録後は住所・氏名・郵便番号を保持しません。</p>
 
-  <div class="grid">
-    <div class="card">
-      <h2><span>1. カメラプレビュー</span><span id="camBadge" class="badge b-town">停止中</span></h2>
-      <video id="camPreview" playsinline muted></video>
-      <div class="row">
-        <button id="camStartBtn" class="ok">カメラ起動</button>
-        <button id="camStopBtn" class="err">カメラ停止</button>
-      </div>
-      <div class="hint">※ HTTPS（GitHub Pages等）とブラウザのカメラ許可が必要です。</div>
+  <div class="card">
+    <h2><span>1. 印字住所の貼り付け・GMAP検索</span><span class="badge b-exact">1件ずつ最速</span></h2>
+    <textarea id="rawInput" placeholder="OSカメラOCRでコピーした宛名を貼り付け（例: 〒190-0023 東京都立川市柴崎町3-1-1 山田太郎）"></textarea>
+    <div class="row">
+      <button id="cleanBtn" class="warn">住所だけ整形</button>
+      <a id="gmapLink" class="btn-link ok" href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer">Googleマップで検索</a>
+      <button id="registerBtn" class="ok">座標変換して登録（個人情報破棄）</button>
+      <button id="sampleBtn">サンプル入力</button>
     </div>
-
-    <div class="card">
-      <h2><span>2. 宛名テキスト取り込み</span><span class="badge b-exact">コスト0円</span></h2>
-      <textarea id="pasteInput" placeholder="OS標準のカメラ文字認識でコピーした宛名を貼り付け&#10;例: 〒190-0023 東京都立川市柴崎町3-1-1 山田太郎&#10;例: 柴崎町3-1-1"></textarea>
-      <div class="row">
-        <button id="ingestBtn" class="ok">取り込み＆座標変換</button>
-        <button id="pasteClipBtn">クリップボード貼付</button>
-        <button id="sampleBtn">サンプル5件</button>
-        <button id="resetBtn" class="err">全初期化</button>
-      </div>
+    <div style="margin-top:10px;">
+      <input type="text" id="cleanedAddress" placeholder="検索・登録に使う整形済み住所（必要ならここで微修正できます）">
     </div>
+    <div class="log" id="sysLog">待機中</div>
   </div>
 
   <div class="card">
-    <h2><span>動作ログ</span></h2>
-    <div class="log" id="sysLog" style="margin-top:0;">待機中</div>
-  </div>
-
-  <div class="card">
-    <h2><span>3. 要確認リスト（町丁目止まり・特定不能）</span><span id="reviewCount" class="badge b-warn">0件</span></h2>
-    <table>
-      <thead>
-        <tr>
-          <th>配達番号</th>
-          <th>精度</th>
-          <th>判定メモ</th>
-          <th>緯度 / 経度</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody id="reviewBody"></tbody>
-    </table>
-  </div>
-
-  <div class="card">
-    <h2><span>4. 確定済み配達データ（氏名・住所・郵便番号 削除済み）</span><span id="confirmedCount" class="badge b-exact">0件</span></h2>
+    <h2><span>2. 登録済み配達リスト（住所・氏名・郵便番号 未保持）</span><span id="listCount" class="badge b-exact">0件</span></h2>
     <table>
       <thead>
         <tr>
@@ -169,7 +130,7 @@
           <th>操作</th>
         </tr>
       </thead>
-      <tbody id="confirmedBody"></tbody>
+      <tbody id="listBody"></tbody>
     </table>
   </div>
 </div>
@@ -177,9 +138,6 @@
 <script>
 let deliveries = [];
 let seqCounter = 0;
-let audioCtx = null;
-let camStream = null;
-const tempReviewMeta = new Map();
 
 function logMsg(msg) {
   const el = document.getElementById("sysLog");
@@ -193,284 +151,143 @@ function escapeHtml(s) {
   }[c]));
 }
 
-function nextDeliveryId() {
-  seqCounter += 1;
-  return `配達番号${String(seqCounter).padStart(3, "0")}`;
-}
-
-function playBeep() {
-  try {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "sine";
-    osc.frequency.value = 880;
-    gain.gain.value = 0.08;
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.12);
-  } catch (_) {}
-}
-
-function setCamBadge(active, label) {
-  const badge = document.getElementById("camBadge");
-  badge.textContent = label;
-  badge.className = active ? "badge b-exact" : "badge b-town";
-}
-
-async function startCamera() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    setCamBadge(false, "非対応環境");
-    logMsg("このブラウザでは getUserMedia に非対応です");
-    return;
-  }
-  try {
-    if (camStream) {
-      camStream.getTracks().forEach(t => t.stop());
-      camStream = null;
-    }
-    camStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: "environment" } },
-      audio: false
-    });
-    const video = document.getElementById("camPreview");
-    video.srcObject = camStream;
-    await video.play();
-    setCamBadge(true, "起動中");
-    logMsg("カメラを起動しました");
-  } catch (e) {
-    setCamBadge(false, "起動失敗");
-    logMsg(`カメラ起動エラー: ${e?.name || ""} ${e?.message || e}`);
-  }
-}
-
-function stopCamera() {
-  if (camStream) {
-    camStream.getTracks().forEach(t => t.stop());
-    camStream = null;
-  }
-  const video = document.getElementById("camPreview");
-  video.srcObject = null;
-  setCamBadge(false, "停止中");
-  logMsg("カメラを停止しました");
-}
-
-// 全角数字・全角ハイフンを半角に寄せる
 function normalizeDigitsAndHyphens(s) {
   return String(s || "")
     .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
     .replace(/[‐−ー－―〜～]/g, "-");
 }
 
-// 貼り付けテキストから住所候補を抽出（捨てすぎない緩和版）
-function parseAddressEntries(rawText) {
-  const lines = String(rawText || "")
-    .split(/\r?\n/)
-    .map(l => normalizeDigitsAndHyphens(l).replace(/\u3000/g, " ").replace(/\s+/g, " ").trim())
-    .filter(Boolean);
+function cleanAddressText(raw) {
+  let s = normalizeDigitsAndHyphens(raw)
+    .replace(/\r?\n+/g, " ")
+    .replace(/[〒\u3012]/g, " ")
+    .replace(/\b\d{3}-?\d{4}\b/g, " ")
+    .replace(/\u3000/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  const entries = [];
-  for (const line of lines) {
-    // 郵便番号記号や郵便番号（3桁-4桁または7桁）を除去
-    let candidate = line
-      .replace(/[〒\u3012]/g, " ")
-      .replace(/\b\d{3}-?\d{4}\b/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    if (!candidate) continue;
-
-    // 末尾に「様」「御中」があればその手前まで（ただし全体が氏名だけなら残す）
-    const honorificMatch = candidate.match(/^(.*?)\s*[^\s]{1,8}(様|御中)$/);
-    if (honorificMatch && honorificMatch[1].trim().length >= 2) {
-      candidate = honorificMatch[1].trim();
-    }
-
-    // 「都・道・府・県・市・区・町・村・丁目・番地・号・数字-数字」または「2文字以上の文字列」があれば候補にする
-    if (candidate.length >= 2) {
-      entries.push(candidate);
-    }
-  }
-  return entries;
+  // 末尾の「〇〇様」「〇〇御中」を簡易除去
+  s = s.replace(/\s+[^\s]{1,10}(様|御中)$/g, "").trim();
+  return s;
 }
 
-async function geocodeJapaneseAddress(address) {
-  if (!address) return { ok: false, accuracy: "UNKNOWN", reason: "住所が空です" };
+function updateGmapLink() {
+  const addr = document.getElementById("cleanedAddress").value.trim();
+  const link = document.getElementById("gmapLink");
+  if (!addr) {
+    link.href = "https://www.google.com/maps";
+    return;
+  }
+  link.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
+}
+
+async function geocodeAddress(address) {
+  if (!address) return { ok: false, accuracy: "UNKNOWN" };
   try {
     const url = `https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(address)}`;
     const res = await fetch(url);
-    if (!res.ok) return { ok: false, accuracy: "UNKNOWN", reason: `API応答エラー(${res.status})` };
+    if (!res.ok) return { ok: false, accuracy: "UNKNOWN" };
     const list = await res.json();
-    if (!Array.isArray(list) || list.length === 0) {
-      return { ok: false, accuracy: "UNKNOWN", reason: `該当なし: ${address.slice(0, 18)}` };
-    }
+    if (!Array.isArray(list) || list.length === 0) return { ok: false, accuracy: "UNKNOWN" };
     const top = list[0];
     const [lng, lat] = top.geometry?.coordinates || [];
     const title = String(top.properties?.title || "");
-    if (typeof lat !== "number" || typeof lng !== "number") {
-      return { ok: false, accuracy: "UNKNOWN", reason: "座標が取得できません" };
-    }
+    if (typeof lat !== "number" || typeof lng !== "number") return { ok: false, accuracy: "UNKNOWN" };
 
     const hasBlockInInput = /(\d+丁目|\d+-\d+|\d+番地|\d+号)/.test(address);
     const hasBlockInResult = /(\d+丁目|\d+-\d+|\d+番地|\d+号)/.test(title);
-    if (hasBlockInInput && hasBlockInResult) {
-      return { ok: true, lat, lng, accuracy: "EXACT", reason: "番地レベルまで特定" };
-    }
-    return { ok: true, lat, lng, accuracy: "TOWN", reason: "町丁目レベルまで特定（番地要確認）" };
+    return {
+      ok: true,
+      lat,
+      lng,
+      accuracy: (hasBlockInInput && hasBlockInResult) ? "EXACT" : "TOWN"
+    };
   } catch (_) {
-    return { ok: false, accuracy: "UNKNOWN", reason: "通信または変換エラー" };
+    return { ok: false, accuracy: "UNKNOWN" };
   }
 }
 
-async function processRawInput(rawText) {
-  const entries = parseAddressEntries(rawText);
-  if (entries.length === 0) {
-    logMsg("空行のみで取り込める文字がありませんでした");
+function renderList() {
+  document.getElementById("listCount").textContent = `${deliveries.length}件`;
+  const tbody = document.getElementById("listBody");
+  if (!deliveries.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--muted)">まだ登録データはありません</td></tr>`;
     return;
   }
-
-  logMsg(`${entries.length}件の候補を処理中...`);
-  for (const addr of entries) {
-    const geo = await geocodeJapaneseAddress(addr);
-    const id = nextDeliveryId();
-    const needsReview = !geo.ok || geo.accuracy !== "EXACT";
-
-    const record = {
-      id,
-      lat: geo.ok ? geo.lat : null,
-      lng: geo.ok ? geo.lng : null,
-      orderSeq: deliveries.length + 1,
-      status: "PENDING",
-      accuracy: geo.accuracy,
-      needsReview
-    };
-
-    if (needsReview) {
-      tempReviewMeta.set(id, { reason: geo.reason });
-    }
-    deliveries.push(record);
-    logMsg(`${id} → ${geo.accuracy} (${geo.reason})`);
-  }
-
-  document.getElementById("pasteInput").value = "";
-  playBeep();
-  renderTables();
+  tbody.innerHTML = deliveries.map(d => `
+    <tr>
+      <td><strong>${escapeHtml(d.id)}</strong></td>
+      <td>#${d.orderSeq}</td>
+      <td>${d.status === "DELIVERED" ? '<span class="badge b-exact">配達済</span>' : '<span class="badge b-town">未配達</span>'}</td>
+      <td>${escapeHtml(d.accuracy)}</td>
+      <td>${d.lat != null ? d.lat.toFixed(6) : "-"}</td>
+      <td>${d.lng != null ? d.lng.toFixed(6) : "-"}</td>
+      <td><button onclick="toggleStatus('${d.id}')">状況切替</button></td>
+    </tr>
+  `).join("");
 }
 
-function confirmReviewItem(id) {
-  const item = deliveries.find(d => d.id === id);
-  if (!item) return;
-  if (item.lat == null || item.lng == null) {
-    item.lat = 35.698262;
-    item.lng = 139.413699;
-    item.accuracy = "TOWN";
-  }
-  item.needsReview = false;
-  tempReviewMeta.delete(id);
-  logMsg(`${id} を確定リストへ移動しました`);
-  renderTables();
-}
-
-function deleteDelivery(id) {
-  deliveries = deliveries.filter(d => d.id !== id);
-  tempReviewMeta.delete(id);
-  logMsg(`${id} を削除しました`);
-  renderTables();
-}
-
-function toggleDelivered(id) {
+function toggleStatus(id) {
   const item = deliveries.find(d => d.id === id);
   if (!item) return;
   item.status = item.status === "DELIVERED" ? "PENDING" : "DELIVERED";
-  renderTables();
+  renderList();
 }
 
-function renderTables() {
-  const reviewItems = deliveries.filter(d => d.needsReview);
-  const confirmedItems = deliveries.filter(d => !d.needsReview);
-
-  document.getElementById("reviewCount").textContent = `${reviewItems.length}件`;
-  document.getElementById("confirmedCount").textContent = `${confirmedItems.length}件`;
-
-  document.getElementById("reviewBody").innerHTML = reviewItems.length
-    ? reviewItems.map(d => {
-        const meta = tempReviewMeta.get(d.id) || { reason: "要確認" };
-        const badgeClass = d.accuracy === "TOWN" ? "b-town" : "b-fail";
-        return `
-          <tr>
-            <td><strong>${escapeHtml(d.id)}</strong></td>
-            <td><span class="badge ${badgeClass}">${escapeHtml(d.accuracy)}</span></td>
-            <td>${escapeHtml(meta.reason)}</td>
-            <td>${d.lat != null ? `${d.lat.toFixed(6)}, ${d.lng.toFixed(6)}` : "未取得"}</td>
-            <td>
-              <button class="ok" onclick="confirmReviewItem('${d.id}')">確定</button>
-              <button class="err" onclick="deleteDelivery('${d.id}')">削除</button>
-            </td>
-          </tr>`;
-      }).join("")
-    : `<tr><td colspan="5" style="color:var(--muted)">要確認データはありません</td></tr>`;
-
-  document.getElementById("confirmedBody").innerHTML = confirmedItems.length
-    ? confirmedItems.map(d => `
-        <tr>
-          <td><strong>${escapeHtml(d.id)}</strong></td>
-          <td>#${d.orderSeq}</td>
-          <td>${d.status === "DELIVERED" ? '<span class="badge b-exact">配達済</span>' : '<span class="badge b-town">未配達</span>'}</td>
-          <td>${escapeHtml(d.accuracy)}</td>
-          <td>${d.lat != null ? d.lat.toFixed(6) : "-"}</td>
-          <td>${d.lng != null ? d.lng.toFixed(6) : "-"}</td>
-          <td>
-            <button onclick="toggleDelivered('${d.id}')">状況切替</button>
-            <button class="err" onclick="deleteDelivery('${d.id}')">削除</button>
-          </td>
-        </tr>`).join("")
-    : `<tr><td colspan="7" style="color:var(--muted)">確定済みデータはありません</td></tr>`;
-}
-
-document.getElementById("camStartBtn").addEventListener("click", startCamera);
-document.getElementById("camStopBtn").addEventListener("click", stopCamera);
-
-document.getElementById("ingestBtn").addEventListener("click", async () => {
-  const val = document.getElementById("pasteInput").value;
-  await processRawInput(val);
+document.getElementById("cleanBtn").addEventListener("click", () => {
+  const raw = document.getElementById("rawInput").value;
+  const cleaned = cleanAddressText(raw);
+  document.getElementById("cleanedAddress").value = cleaned;
+  updateGmapLink();
+  logMsg(cleaned ? `整形完了: ${cleaned}` : "整形できる住所がありません");
 });
 
-document.getElementById("pasteClipBtn").addEventListener("click", async () => {
-  try {
-    const text = await navigator.clipboard.readText();
-    if (text) {
-      document.getElementById("pasteInput").value = text;
-      await processRawInput(text);
-    } else {
-      logMsg("クリップボードが空です");
-    }
-  } catch (_) {
-    logMsg("クリップボードの直接読み取りが許可されていません。テキスト欄へ長押し貼り付けしてください。");
+document.getElementById("rawInput").addEventListener("input", e => {
+  const cleaned = cleanAddressText(e.target.value);
+  document.getElementById("cleanedAddress").value = cleaned;
+  updateGmapLink();
+});
+
+document.getElementById("cleanedAddress").addEventListener("input", updateGmapLink);
+
+document.getElementById("registerBtn").addEventListener("click", async () => {
+  const addr = document.getElementById("cleanedAddress").value.trim() || cleanAddressText(document.getElementById("rawInput").value);
+  if (!addr) {
+    logMsg("登録する住所を入力または貼り付けてください");
+    return;
   }
+  const geo = await geocodeAddress(addr);
+  seqCounter += 1;
+  const id = `配達番号${String(seqCounter).padStart(3, "0")}`;
+
+  // 住所・氏名・郵便番号はここで破棄し、保持対象のみ格納
+  deliveries.push({
+    id,
+    lat: geo.ok ? geo.lat : null,
+    lng: geo.ok ? geo.lng : null,
+    orderSeq: deliveries.length + 1,
+    status: "PENDING",
+    accuracy: geo.accuracy
+  });
+
+  document.getElementById("rawInput").value = "";
+  document.getElementById("cleanedAddress").value = "";
+  updateGmapLink();
+  logMsg(`${id} を登録しました（精度: ${geo.accuracy} / 個人情報は未保持）`);
+  renderList();
 });
 
 document.getElementById("sampleBtn").addEventListener("click", () => {
-  document.getElementById("pasteInput").value = [
-    "〒190-0023 東京都立川市柴崎町3-1-1 山田太郎",
-    "〒190-0012 東京都立川市曙町2-1-1 佐藤花子",
-    "東京都立川市錦町1丁目 鈴木一郎",
-    "〒190-0023 東京都立川市柴崎町3-1-1 田中次郎",
-    "架空の住所 99-99 高橋三郎"
-  ].join("\n");
+  const sample = "〒190-0023 東京都立川市柴崎町3-1-1 山田太郎";
+  document.getElementById("rawInput").value = sample;
+  const cleaned = cleanAddressText(sample);
+  document.getElementById("cleanedAddress").value = cleaned;
+  updateGmapLink();
+  logMsg("サンプル住所を入力しました");
 });
 
-document.getElementById("resetBtn").addEventListener("click", () => {
-  deliveries = [];
-  seqCounter = 0;
-  tempReviewMeta.clear();
-  document.getElementById("pasteInput").value = "";
-  renderTables();
-  logMsg("全データを初期化しました");
-});
-
-renderTables();
-logMsg("v0.2.2 準備完了");
+renderList();
+logMsg("v0.3 準備完了（貼り付け → GMAPで検索 → 登録）");
 </script>
 </body>
 </html>
