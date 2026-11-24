@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>徒歩配達ルート最適化 v0.1 // 取り込み・座標変換・個人情報破棄</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+  :root {
+    --bg: #0b1020;
+    --card: #131c33;
+    --border: #26355c;
+    --text: #eef3ff;
+    --muted: #95a5c6;
+    --accent: #38bdf8;
+    --ok: #22c55e;
+    --warn: #f59e0b;
+    --err: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  h1 { margin: 0 0 4px; font-size: 20px; }
+  .sub { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .card h2 { margin: 0 0 10px; font-size: 15px; color: var(--accent); display: flex; justify-content: space-between; align-items: center; }
+  video, canvas { width: 100%; border-radius: 8px; background: #050811; display: block; }
+  canvas { display: none; }
+  textarea, input[type="text"] {
+    width: 100%;
+    background: #0a0f1d;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  textarea { min-height: 96px; resize: vertical; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  button {
+    background: #1d3557;
+    color: #fff;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button:hover { background: #254673; }
+  button.ok { border-color: var(--ok); background: rgba(34, 197, 94, 0.16); color: #86efac; }
+  button.warn { border-color: var(--warn); background: rgba(245, 158, 11, 0.16); color: #fcd34d; }
+  button.err { border-color: var(--err); background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
+  .badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .b-exact { background: rgba(34,197,94,0.2); color: #86efac; }
+  .b-town { background: rgba(245,158,11,0.2); color: #fcd34d; }
+  .b-fail { background: rgba(239,68,68,0.2); color: #fca5a5; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+  th, td { border-bottom: 1px solid rgba(148,163,184,0.15); padding: 7px 6px; text-align: left; }
+  th { color: var(--muted); font-size: 11px; }
+  .log { font-family: ui-monospace, monospace; font-size: 11.5px; color: var(--muted); max-height: 120px; overflow-y: auto; background: #080c17; padding: 8px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>徒歩配達ルート最適化 v0.1 — 取り込み・座標化・個人情報破棄</h1>
+  <p class="sub">座標変換後に「氏名・住所・郵便番号・OCR生テキスト」を破棄し、地図/配達用レコード（配達番号・緯度・経度・順序・状況・精度）のみ保持します。</p>
+
+  <div class="grid">
+    <!-- 3-1 カメラ連続読み取り（OCR） -->
+    <div class="card">
+      <h2><span>1. カメラ連続読み取り（OCR）</span><span id="ocrStatus" class="badge b-town">停止中</span></h2>
+      <video id="video" playsinline muted></video>
+      <canvas id="captureCanvas"></canvas>
+      <div class="row">
+        <button id="startCamBtn">カメラ開始</button>
+        <button id="toggleAutoBtn" class="warn">連続OCR: OFF</button>
+        <button id="snapOcrBtn">今すぐ1回OCR</button>
+      </div>
+      <div class="row">
+        <input type="text" id="ocrRawPreview" placeholder="OCR認識テキスト（検証用・処理後に破棄）" readonly>
+      </div>
+      <div class="log" id="sysLog" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- 手動／一括テスト取り込み -->
+    <div class="card">
+      <h2><span>2. 宛名テキスト取り込み（手入力・一括テスト）</span></h2>
+      <textarea id="bulkInput" placeholder="1行1件で入力（例: 〒190-0023 東京都立川市柴崎町3-1-1 山田太郎）"></textarea>
+      <div class="row">
+        <button id="addBulkBtn" class="ok">一括取り込み＆座標変換</button>
+        <button id="fillSampleBtn">立川付近のサンプル5件を入力</button>
+        <button id="clearAllBtn" class="err">全データ破棄</button>
+      </div>
+      <div class="row">
+        <button id="purgeTempBtn" class="warn">一時バッファ強制破棄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 要確認リスト -->
+  <div class="card" style="margin-bottom:14px;">
+    <h2><span>3. 要確認リスト（町丁目止まり・特定不能）</span><span id="reviewCount" class="badge b-warn">0件</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>配達番号</th>
+          <th>精度</th>
+          <th>確認用メモ（確定後に削除可）</th>
+          <th>緯度 / 経度</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="reviewBody"></tbody>
+    </table>
+  </div>
+
+  <!-- 確定済み配達リスト（個人情報削除済みモデル） -->
+  <div class="card">
+    <h2><span>4. 確定済み配達データ（氏名・住所・郵便番号 削除済み）</span><span id="confirmedCount" class="badge b-exact">0件</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>配達番号</th>
+          <th>順序</th>
+          <th>状況</th>
+          <th>精度</th>
+          <th>緯度</th>
+          <th>経度</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="confirmedBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// 一時メモリ（処理完了・破棄対象）
+let tempBuffer = {
+  lastOcrText: "",
+  recentNormalized: [],
+  recentSignatures: new Map(), // signature -> timestamp
+  pendingReviewMeta: new Map() // deliveryId -> { reason, tempAddressHint }
+};
+
+// 保持対象（個人情報を含まない配達モデル）
+// { id, lat, lng, orderSeq, status: "PENDING"|"DELIVERED", accuracy: "EXACT"|"TOWN"|"UNKNOWN", needsReview: boolean }
+let deliveries = [];
+let seqCounter = 0;
+let autoOcrTimer = null;
+let isOcrBusy = false;
+let audioCtx = null;
+
+function logMsg(msg) {
+  const el = document.getElementById("sysLog");
+  const t = new Date().toLocaleTimeString("ja-JP", { hour12: false });
+  el.innerHTML = `[${t}] ${escapeHtml(msg)}<br>` + el.innerHTML;
+}
+
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+
+function nextDeliveryId() {
+  seqCounter += 1;
+  return `配達番号${String(seqCounter).padStart(3, "0")}`;
+}
+
+function playBeep() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = 880;
+    gain.gain.value = 0.08;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.12);
+  } catch (_) {}
+}
+
+// 住所文字列の整形（郵便番号・氏名の簡易分離）
+function extractAddressAndName(rawLine) {
+  const cleaned = String(rawLine || "")
+    .replace(/[〒\u3012]/g, " ")
+    .replace(/\d{3}-?\d{4}/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // 末尾に「様」「御中」やスペース区切りの氏名らしき部分があれば分離
+  const parts = cleaned.split(" ");
+  let address = cleaned;
+  let name = "";
+  if (parts.length >= 2) {
+    const last = parts[parts.length - 1];
+    if (/(様|御中)$/.test(last) || (!/\d/.test(last) && last.length <= 6)) {
+      name = parts.pop();
+      address = parts.join(" ");
+    }
+  }
+  return { address, name, normalized: address.replace(/[‐−ー－\s]/g, "") };
+}
+
+// 国土地理院 住所検索APIで座標変換＆精度簡易判定
+async function geocodeJapaneseAddress(address) {
+  if (!address) return { ok: false, accuracy: "UNKNOWN", reason: "住所が空です" };
+  try {
+    const url = `https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(address)}`;
+    const res = await fetch(url);
+    if (!res.ok) return { ok: false, accuracy: "UNKNOWN", reason: `API応答エラー(${res.status})` };
+    const list = await res.json();
+    if (!Array.isArray(list) || list.length === 0) {
+      return { ok: false, accuracy: "UNKNOWN", reason: "該当住所が見つかりません" };
+    }
+    const top = list[0];
+    const [lng, lat] = top.geometry?.coordinates || [];
+    const title = String(top.properties?.title || "");
+    if (typeof lat !== "number" || typeof lng !== "number") {
+      return { ok: false, accuracy: "UNKNOWN", reason: "座標が取得できません" };
+    }
+
+    // 番地・号らしき数字が含まれるか、または入力住所に丁目・番地があるかで簡易判定
+    const hasBlockInInput = /(\d+丁目|\d+[-−ー]\d+|\d+番地|\d+号)/.test(address);
+    const hasBlockInResult = /(\d+丁目|\d+[-−ー]\d+|\d+番地|\d+号)/.test(title);
+    if (hasBlockInInput && hasBlockInResult) {
+      return { ok: true, lat, lng, accuracy: "EXACT", reason: "番地レベルまで特定" };
+    }
+    return { ok: true, lat, lng, accuracy: "TOWN", reason: "町丁目レベルまで特定（番地要確認）" };
+  } catch (e) {
+    return { ok: false, accuracy: "UNKNOWN", reason: "通信または変換エラー" };
+  }
+}
+
+// 重複チェック（同一の住所+氏名が直近5秒以内ならスキップ、別件なら別番号で登録）
+function isDuplicateBurst(address, name) {
+  const now = Date.now();
+  for (const [sig, ts] of tempBuffer.recentSignatures.entries()) {
+    if (now - ts > 5000) tempBuffer.recentSignatures.delete(sig);
+  }
+  const sig = `${address.replace(/\s+/g, "")}__${name}`;
+  const prev = tempBuffer.recentSignatures.get(sig);
+  if (prev && now - prev < 5000) {
+    return true;
+  }
+  tempBuffer.recentSignatures.set(sig, now);
+  return false;
+}
+
+// 1件の取り込み〜座標変換〜個人情報破棄
+async function ingestAddressLine(rawLine, { checkBurst = false } = {}) {
+  const { address, name, normalized } = extractAddressAndName(rawLine);
+  if (!normalized) return;
+
+  if (checkBurst && isDuplicateBurst(address, name)) {
+    logMsg("直近5秒以内の同一宛名のため重複スキップ");
+    return;
+  }
+
+  const geo = await geocodeJapaneseAddress(address);
+  const id = nextDeliveryId();
+
+  // 座標変換完了後、氏名・住所・郵便番号は保持モデルに入れない
+  const needsReview = !geo.ok || geo.accuracy !== "EXACT";
+  const record = {
+    id,
+    lat: geo.ok ? geo.lat : null,
+    lng: geo.ok ? geo.lng : null,
+    orderSeq: deliveries.length + 1,
+    status: "PENDING",
+    accuracy: geo.accuracy,
+    needsReview
+  };
+
+  if (needsReview) {
+    // 確認リスト処理中のみ一時ヒントを保持（確定時に破棄可能）
+    tempBuffer.pendingReviewMeta.set(id, { reason: geo.reason });
+  }
+
+  deliveries.push(record);
+  playBeep();
+  logMsg(`${id} 登録完了（精度: ${geo.accuracy} / 個人情報は保持モデル未格納）`);
+  renderTables();
+}
+
+function purgeTemporaryPersonalData() {
+  tempBuffer.lastOcrText = "";
+  tempBuffer.recentNormalized = [];
+  tempBuffer.recentSignatures.clear();
+  document.getElementById("ocrRawPreview").value = "";
+  const canvas = document.getElementById("captureCanvas");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  logMsg("一時OCRテキスト・画像バッファ・重複キャッシュを破棄しました");
+}
+
+function confirmReviewItem(id) {
+  const item = deliveries.find(d => d.id === id);
+  if (!item) return;
+  if (item.lat == null || item.lng == null) {
+    // テスト用にダミー座標（立川駅付近）を割り当てて確定できるようにする
+    item.lat = 35.698262;
+    item.lng = 139.413699;
+    item.accuracy = "TOWN";
+  }
+  item.needsReview = false;
+  tempBuffer.pendingReviewMeta.delete(id);
+  renderTables();
+}
+
+function deleteDelivery(id) {
+  deliveries = deliveries.filter(d => d.id !== id);
+  tempBuffer.pendingReviewMeta.delete(id);
+  renderTables();
+}
+
+function toggleDelivered(id) {
+  const item = deliveries.find(d => d.id === id);
+  if (!item) return;
+  item.status = item.status === "DELIVERED" ? "PENDING" : "DELIVERED";
+  renderTables();
+}
+
+function renderTables() {
+  const reviewItems = deliveries.filter(d => d.needsReview);
+  const confirmedItems = deliveries.filter(d => !d.needsReview);
+
+  document.getElementById("reviewCount").textContent = `${reviewItems.length}件`;
+  document.getElementById("confirmedCount").textContent = `${confirmedItems.length}件`;
+
+  document.getElementById("reviewBody").innerHTML = reviewItems.length
+    ? reviewItems.map(d => {
+        const meta = tempBuffer.pendingReviewMeta.get(d.id) || { reason: "要確認" };
+        const badgeClass = d.accuracy === "TOWN" ? "b-town" : "b-fail";
+        return `
+          <tr>
+            <td><strong>${escapeHtml(d.id)}</strong></td>
+            <td><span class="badge ${badgeClass}">${escapeHtml(d.accuracy)}</span></td>
+            <td>${escapeHtml(meta.reason)}</td>
+            <td>${d.lat != null ? `${d.lat.toFixed(6)}, ${d.lng.toFixed(6)}` : "未取得"}</td>
+            <td>
+              <button class="ok" onclick="confirmReviewItem('${d.id}')">確定</button>
+              <button class="err" onclick="deleteDelivery('${d.id}')">削除</button>
+            </td>
+          </tr>`;
+      }).join("")
+    : `<tr><td colspan="5" style="color:var(--muted)">要確認データはありません</td></tr>`;
+
+  document.getElementById("confirmedBody").innerHTML = confirmedItems.length
+    ? confirmedItems.map(d => `
+        <tr>
+          <td><strong>${escapeHtml(d.id)}</strong></td>
+          <td>#${d.orderSeq}</td>
+          <td>${d.status === "DELIVERED" ? '<span class="badge b-exact">配達済</span>' : '<span class="badge b-town">未配達</span>'}</td>
+          <td>${escapeHtml(d.accuracy)}</td>
+          <td>${d.lat != null ? d.lat.toFixed(6) : "-"}</td>
+          <td>${d.lng != null ? d.lng.toFixed(6) : "-"}</td>
+          <td>
+            <button onclick="toggleDelivered('${d.id}')">状況切替</button>
+            <button class="err" onclick="deleteDelivery('${d.id}')">削除</button>
+          </td>
+        </tr>`).join("")
+    : `<tr><td colspan="7" style="color:var(--muted)">確定済みデータはありません</td></tr>`;
+}
+
+// カメラ＆Tesseract OCR処理
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+    const video = document.getElementById("video");
+    video.srcObject = stream;
+    await video.play();
+    logMsg("背面カメラを起動しました");
+  } catch (e) {
+    logMsg("カメラ起動に失敗（HTTPS/localhostや許可設定を確認してください）");
+  }
+}
+
+async function runSingleOcr({ fromAuto = false } = {}) {
+  if (isOcrBusy) return;
+  const video = document.getElementById("video");
+  if (!video.srcObject || video.readyState < 2) {
+    if (!fromAuto) logMsg("カメラ映像が未取得のため、右のテキスト取り込みをお試しください");
+    return;
+  }
+  isOcrBusy = true;
+  try {
+    const canvas = document.getElementById("captureCanvas");
+    const w = Math.min(960, video.videoWidth || 640);
+    const h = Math.round(((video.videoHeight || 480) / (video.videoWidth || 640)) * w);
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, w, h);
+
+    const { data } = await Tesseract.recognize(canvas, "jpn");
+    const text = String(data?.text || "").trim();
+    tempBuffer.lastOcrText = text;
+    document.getElementById("ocrRawPreview").value = text.replace(/\n+/g, " / ");
+
+    const norm = text.replace(/[\s\u3000]/g, "");
+    if (norm.length >= 6) {
+      tempBuffer.recentNormalized.push(norm);
+      if (tempBuffer.recentNormalized.length > 3) tempBuffer.recentNormalized.shift();
+
+      // 連続2回一致で安定とみなす（手動実行時は即処理）
+      const stable = !fromAuto || (
+        tempBuffer.recentNormalized.length >= 2 &&
+        tempBuffer.recentNormalized[tempBuffer.recentNormalized.length - 1] === tempBuffer.recentNormalized[tempBuffer.recentNormalized.length - 2]
+      );
+      if (stable) {
+        const firstLine = text.split("\n").map(s => s.trim()).filter(Boolean)[0] || text;
+        await ingestAddressLine(firstLine, { checkBurst: true });
+        purgeTemporaryPersonalData();
+      }
+    }
+  } catch (e) {
+    logMsg("OCR処理中にエラーが発生しました");
+  } finally {
+    isOcrBusy = false;
+  }
+}
+
+document.getElementById("startCamBtn").addEventListener("click", startCamera);
+document.getElementById("snapOcrBtn").addEventListener("click", () => runSingleOcr({ fromAuto: false }));
+document.getElementById("toggleAutoBtn").addEventListener("click", e => {
+  const btn = e.currentTarget;
+  const st = document.getElementById("ocrStatus");
+  if (autoOcrTimer) {
+    clearInterval(autoOcrTimer);
+    autoOcrTimer = null;
+    btn.textContent = "連続OCR: OFF";
+    st.textContent = "停止中";
+    st.className = "badge b-town";
+  } else {
+    autoOcrTimer = setInterval(() => runSingleOcr({ fromAuto: true }), 1200);
+    btn.textContent = "連続OCR: ON";
+    st.textContent = "連続読取中";
+    st.className = "badge b-exact";
+  }
+});
+
+document.getElementById("addBulkBtn").addEventListener("click", async () => {
+  const lines = document.getElementById("bulkInput").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  for (const line of lines) {
+    await ingestAddressLine(line, { checkBurst: false });
+  }
+  document.getElementById("bulkInput").value = "";
+  purgeTemporaryPersonalData();
+});
+
+document.getElementById("fillSampleBtn").addEventListener("click", () => {
+  document.getElementById("bulkInput").value = [
+    "〒190-0023 東京都立川市柴崎町3-1-1 山田太郎",
+    "〒190-0012 東京都立川市曙町2-1-1 佐藤花子",
+    "東京都立川市錦町1丁目 鈴木一郎",
+    "〒190-0023 東京都立川市柴崎町3-1-1 田中次郎",
+    "存在しない架空番地 999-999 高橋三郎"
+  ].join("\n");
+});
+
+document.getElementById("purgeTempBtn").addEventListener("click", purgeTemporaryPersonalData);
+document.getElementById("clearAllBtn").addEventListener("click", () => {
+  deliveries = [];
+  seqCounter = 0;
+  tempBuffer.pendingReviewMeta.clear();
+  purgeTemporaryPersonalData();
+  renderTables();
+  logMsg("全配達データと一時データを初期化しました");
+});
+
+renderTables();
+logMsg("プロトタイプ v0.1 準備完了");
+</script>
+</body>
+</html>
