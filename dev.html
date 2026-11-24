@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>徒歩配達ルート最適化 v0.2.1 // カメラ確認・貼り付け・座標化</title>
+<title>徒歩配達ルート最適化 v0.2.2 // 住所抽出緩和版</title>
 <style>
   :root {
     --bg: #0b1020;
@@ -96,7 +96,7 @@
     font-family: ui-monospace, monospace;
     font-size: 11.5px;
     color: var(--muted);
-    max-height: 110px;
+    max-height: 120px;
     overflow-y: auto;
     background: #080c17;
     padding: 8px;
@@ -108,11 +108,10 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>徒歩配達ルート最適化 v0.2.1 — カメラ確認・貼り付け・座標化</h1>
-  <p class="sub">カメラプレビュー確認と、OS標準OCRでコピーした宛名テキストの取り込み・座標変換・個人情報破棄を1枚にまとめています。</p>
+  <h1>徒歩配達ルート最適化 v0.2.2 — 住所抽出緩和版</h1>
+  <p class="sub">貼り付けテキストの抽出条件を緩め、氏名・住所・郵便番号を座標変換後に破棄するプロトタイプです。</p>
 
   <div class="grid">
-    <!-- カメラプレビュー -->
     <div class="card">
       <h2><span>1. カメラプレビュー</span><span id="camBadge" class="badge b-town">停止中</span></h2>
       <video id="camPreview" playsinline muted></video>
@@ -120,13 +119,12 @@
         <button id="camStartBtn" class="ok">カメラ起動</button>
         <button id="camStopBtn" class="err">カメラ停止</button>
       </div>
-      <div class="hint">※ 起動しない場合はHTTPS（GitHub Pages等）か、ブラウザのカメラ許可・他アプリのカメラ占有を確認してください。</div>
+      <div class="hint">※ HTTPS（GitHub Pages等）とブラウザのカメラ許可が必要です。</div>
     </div>
 
-    <!-- 宛名テキストの貼り付け・取り込み -->
     <div class="card">
       <h2><span>2. 宛名テキスト取り込み</span><span class="badge b-exact">コスト0円</span></h2>
-      <textarea id="pasteInput" placeholder="OS標準のカメラ文字認識でコピーした宛名を貼り付け（1行1件、複数行まとめてもOK）&#10;例: 〒190-0023 東京都立川市柴崎町3-1-1 山田太郎"></textarea>
+      <textarea id="pasteInput" placeholder="OS標準のカメラ文字認識でコピーした宛名を貼り付け&#10;例: 〒190-0023 東京都立川市柴崎町3-1-1 山田太郎&#10;例: 柴崎町3-1-1"></textarea>
       <div class="row">
         <button id="ingestBtn" class="ok">取り込み＆座標変換</button>
         <button id="pasteClipBtn">クリップボード貼付</button>
@@ -177,7 +175,6 @@
 </div>
 
 <script>
-// 保持対象（個人情報を含まない配達モデル）
 let deliveries = [];
 let seqCounter = 0;
 let audioCtx = null;
@@ -225,7 +222,7 @@ function setCamBadge(active, label) {
 async function startCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     setCamBadge(false, "非対応環境");
-    logMsg("このブラウザでは getUserMedia に非対応です（HTTPSまたは対応ブラウザを確認してください）");
+    logMsg("このブラウザでは getUserMedia に非対応です");
     return;
   }
   try {
@@ -259,35 +256,41 @@ function stopCamera() {
   logMsg("カメラを停止しました");
 }
 
+// 全角数字・全角ハイフンを半角に寄せる
+function normalizeDigitsAndHyphens(s) {
+  return String(s || "")
+    .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+    .replace(/[‐−ー－―〜～]/g, "-");
+}
+
+// 貼り付けテキストから住所候補を抽出（捨てすぎない緩和版）
 function parseAddressEntries(rawText) {
   const lines = String(rawText || "")
     .split(/\r?\n/)
-    .map(l => l.trim())
+    .map(l => normalizeDigitsAndHyphens(l).replace(/\u3000/g, " ").replace(/\s+/g, " ").trim())
     .filter(Boolean);
 
   const entries = [];
   for (const line of lines) {
-    const stripped = line
+    // 郵便番号記号や郵便番号（3桁-4桁または7桁）を除去
+    let candidate = line
       .replace(/[〒\u3012]/g, " ")
-      .replace(/\d{3}-?\d{4}/g, " ")
+      .replace(/\b\d{3}-?\d{4}\b/g, " ")
       .replace(/\s+/g, " ")
       .trim();
-    if (!stripped) continue;
 
-    const hasAddressToken = /(都|道|府|県|市|区|町|村|丁目|番地|号|\d+[-−ー]\d+)/.test(stripped);
-    if (!hasAddressToken && entries.length > 0 && stripped.length <= 8) {
-      continue;
+    if (!candidate) continue;
+
+    // 末尾に「様」「御中」があればその手前まで（ただし全体が氏名だけなら残す）
+    const honorificMatch = candidate.match(/^(.*?)\s*[^\s]{1,8}(様|御中)$/);
+    if (honorificMatch && honorificMatch[1].trim().length >= 2) {
+      candidate = honorificMatch[1].trim();
     }
 
-    const parts = stripped.split(" ");
-    if (parts.length >= 2) {
-      const last = parts[parts.length - 1];
-      if (/(様|御中)$/.test(last) || (!/\d/.test(last) && last.length <= 6)) {
-        parts.pop();
-      }
+    // 「都・道・府・県・市・区・町・村・丁目・番地・号・数字-数字」または「2文字以上の文字列」があれば候補にする
+    if (candidate.length >= 2) {
+      entries.push(candidate);
     }
-    const addressOnly = parts.join(" ").trim();
-    if (addressOnly) entries.push(addressOnly);
   }
   return entries;
 }
@@ -300,7 +303,7 @@ async function geocodeJapaneseAddress(address) {
     if (!res.ok) return { ok: false, accuracy: "UNKNOWN", reason: `API応答エラー(${res.status})` };
     const list = await res.json();
     if (!Array.isArray(list) || list.length === 0) {
-      return { ok: false, accuracy: "UNKNOWN", reason: "該当住所が見つかりません" };
+      return { ok: false, accuracy: "UNKNOWN", reason: `該当なし: ${address.slice(0, 18)}` };
     }
     const top = list[0];
     const [lng, lat] = top.geometry?.coordinates || [];
@@ -309,8 +312,8 @@ async function geocodeJapaneseAddress(address) {
       return { ok: false, accuracy: "UNKNOWN", reason: "座標が取得できません" };
     }
 
-    const hasBlockInInput = /(\d+丁目|\d+[-−ー]\d+|\d+番地|\d+号)/.test(address);
-    const hasBlockInResult = /(\d+丁目|\d+[-−ー]\d+|\d+番地|\d+号)/.test(title);
+    const hasBlockInInput = /(\d+丁目|\d+-\d+|\d+番地|\d+号)/.test(address);
+    const hasBlockInResult = /(\d+丁目|\d+-\d+|\d+番地|\d+号)/.test(title);
     if (hasBlockInInput && hasBlockInResult) {
       return { ok: true, lat, lng, accuracy: "EXACT", reason: "番地レベルまで特定" };
     }
@@ -323,10 +326,11 @@ async function geocodeJapaneseAddress(address) {
 async function processRawInput(rawText) {
   const entries = parseAddressEntries(rawText);
   if (entries.length === 0) {
-    logMsg("取り込める住所が見つかりませんでした");
+    logMsg("空行のみで取り込める文字がありませんでした");
     return;
   }
 
+  logMsg(`${entries.length}件の候補を処理中...`);
   for (const addr of entries) {
     const geo = await geocodeJapaneseAddress(addr);
     const id = nextDeliveryId();
@@ -346,7 +350,7 @@ async function processRawInput(rawText) {
       tempReviewMeta.set(id, { reason: geo.reason });
     }
     deliveries.push(record);
-    logMsg(`${id} を登録（精度: ${geo.accuracy} / 個人情報は未保持）`);
+    logMsg(`${id} → ${geo.accuracy} (${geo.reason})`);
   }
 
   document.getElementById("pasteInput").value = "";
@@ -466,7 +470,7 @@ document.getElementById("resetBtn").addEventListener("click", () => {
 });
 
 renderTables();
-logMsg("v0.2.1 準備完了");
+logMsg("v0.2.2 準備完了");
 </script>
 </body>
 </html>
