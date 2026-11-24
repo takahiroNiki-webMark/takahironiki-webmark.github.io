@@ -3,167 +3,300 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OCR切り分けテスト // 枠内拡大＆コントラスト強調</title>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<title>徒歩配達ルート最適化 v0.2 // OS標準OCR貼り付け＆座標化</title>
 <style>
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1020; color: #eef3ff; padding: 14px; }
-  .wrap { max-width: 720px; margin: 0 auto; }
-  h1 { margin: 0 0 6px; font-size: 18px; }
-  p.sub { margin: 0 0 12px; font-size: 12.5px; color: #95a5c6; }
-  .cam-box { position: relative; width: 100%; background: #050811; border-radius: 10px; overflow: hidden; border: 1px solid #26355c; }
-  video { width: 100%; display: block; max-height: 360px; object-fit: cover; }
-  /* 画面中央の読み取りガイド枠 */
-  .guide {
-    position: absolute;
-    left: 6%; right: 6%; top: 28%; height: 44%;
-    border: 2px solid #38bdf8;
-    box-shadow: 0 0 0 9999px rgba(5, 8, 17, 0.55);
-    border-radius: 6px;
-    pointer-events: none;
+  :root {
+    --bg: #0b1020;
+    --card: #131c33;
+    --border: #26355c;
+    --text: #eef3ff;
+    --muted: #95a5c6;
+    --accent: #38bdf8;
+    --ok: #22c55e;
+    --warn: #f59e0b;
+    --err: #ef4444;
   }
-  .guide-label {
-    position: absolute; top: -22px; left: 0;
-    background: #38bdf8; color: #050811; font-size: 11px; font-weight: 700;
-    padding: 1px 6px; border-radius: 4px;
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 14px; }
+  h1 { margin: 0 0 4px; font-size: 19px; }
+  .sub { margin: 0 0 14px; color: var(--muted); font-size: 12.5px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .card h2 {
+    margin: 0 0 10px;
+    font-size: 15px;
+    color: var(--accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  textarea {
+    width: 100%;
+    min-height: 110px;
+    background: #080c17;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    resize: vertical;
   }
   .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
   button {
-    background: #1d3557; color: #fff; border: 1px solid #38bdf8;
-    border-radius: 7px; padding: 9px 14px; font-size: 13px; font-weight: 700; cursor: pointer;
+    background: #1d3557;
+    color: #fff;
+    border: 1px solid var(--accent);
+    border-radius: 7px;
+    padding: 8px 13px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
   }
-  button.ok { border-color: #22c55e; background: rgba(34,197,94,0.18); color: #86efac; }
-  .panel { background: #131c33; border: 1px solid #26355c; border-radius: 10px; padding: 12px; margin-top: 12px; }
-  .panel h2 { margin: 0 0 8px; font-size: 13.5px; color: #38bdf8; }
-  canvas.crop-view { width: 100%; max-height: 160px; object-fit: contain; background: #000; border-radius: 6px; border: 1px solid #26355c; }
-  textarea { width: 100%; min-height: 90px; background: #080c17; color: #eef3ff; border: 1px solid #26355c; border-radius: 6px; padding: 8px; font-size: 14px; margin-top: 6px; }
-  .log { font-family: ui-monospace, monospace; font-size: 11.5px; color: #95a5c6; margin-top: 8px; white-space: pre-wrap; }
+  button:hover { background: #254673; }
+  button.ok { border-color: var(--ok); background: rgba(34, 197, 94, 0.16); color: #86efac; }
+  button.warn { border-color: var(--warn); background: rgba(245, 158, 11, 0.16); color: #fcd34d; }
+  button.err { border-color: var(--err); background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .b-exact { background: rgba(34,197,94,0.2); color: #86efac; }
+  .b-town { background: rgba(245,158,11,0.2); color: #fcd34d; }
+  .b-fail { background: rgba(239,68,68,0.2); color: #fca5a5; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 6px; }
+  th, td { border-bottom: 1px solid rgba(148,163,184,0.15); padding: 7px 6px; text-align: left; }
+  th { color: var(--muted); font-size: 11px; }
+  .log {
+    font-family: ui-monospace, monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    max-height: 110px;
+    overflow-y: auto;
+    background: #080c17;
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 10px;
+  }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>OCR切り分けテスト（枠内拡大＆強調）</h1>
-  <p class="sub">水色の枠に宛名を入れて「今すぐ枠内OCR」を押してください。切り抜いた画像と認識結果を表示します。</p>
+  <h1>徒歩配達ルート最適化 v0.2 — OS標準OCR貼り付け＆座標化</h1>
+  <p class="sub">スマホのカメラ文字認識でコピーした宛名を貼り付けると、緯度・経度へ変換し、氏名・住所・郵便番号を破棄します。</p>
 
-  <div class="cam-box">
-    <video id="video" playsinline muted></video>
-    <div class="guide"><span class="guide-label">ここに宛名を入れる</span></div>
+  <div class="card">
+    <h2><span>1. 宛名テキストの貼り付け・取り込み</span><span class="badge b-exact">コスト0円・OCR軽量化</span></h2>
+    <textarea id="pasteInput" placeholder="ここにOSカメラOCRでコピーした宛名を貼り付け（1行1件、複数行まとめてもOK）&#10;例: 〒190-0023 東京都立川市柴崎町3-1-1 山田太郎"></textarea>
+    <div class="hint">※「宛名と氏名が2行に分かれている場合」も、次の行が数字や番地ではなく氏名らしき行であれば自動で住所側にまとめます。</div>
+    <div class="row">
+      <button id="ingestBtn" class="ok">取り込み＆座標変換（個人情報破棄）</button>
+      <button id="pasteClipBtn">クリップボードから貼り付け</button>
+      <button id="sampleBtn">サンプル5件を入力</button>
+      <button id="resetBtn" class="err">全データ初期化</button>
+    </div>
+    <div class="log" id="sysLog">待機中</div>
   </div>
 
-  <div class="row">
-    <button id="startBtn">1. カメラ起動</button>
-    <button id="ocrBtn" class="ok">2. 今すぐ枠内OCR</button>
-    <label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#cbd5e1;">
-      <input type="checkbox" id="highContrast" checked> コントラスト強調
-    </label>
+  <div class="card">
+    <h2><span>2. 要確認リスト（町丁目止まり・特定不能）</span><span id="reviewCount" class="badge b-warn">0件</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>配達番号</th>
+          <th>精度</th>
+          <th>判定メモ</th>
+          <th>緯度 / 経度</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="reviewBody"></tbody>
+    </table>
   </div>
 
-  <div class="panel">
-    <h2>OCRに渡した切り抜き画像（確認用）</h2>
-    <canvas id="cropCanvas" class="crop-view"></canvas>
-    <h2 style="margin-top:10px;">認識結果</h2>
-    <textarea id="resultText" placeholder="ここに認識された文字が出ます"></textarea>
-    <div class="log" id="log">待機中</div>
+  <div class="card">
+    <h2><span>3. 確定済み配達データ（氏名・住所・郵便番号 削除済み）</span><span id="confirmedCount" class="badge b-exact">0件</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>配達番号</th>
+          <th>順序</th>
+          <th>状況</th>
+          <th>精度</th>
+          <th>緯度</th>
+          <th>経度</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="confirmedBody"></tbody>
+    </table>
   </div>
 </div>
 
 <script>
-let worker = null;
-let busy = false;
+// 保持対象（個人情報を含まない配達モデル）
+let deliveries = [];
+let seqCounter = 0;
+let audioCtx = null;
+// 確認リスト表示中の一時メモ（確定または削除時に破棄）
+const tempReviewMeta = new Map();
 
-function setLog(msg) {
-  document.getElementById("log").textContent = msg;
+function logMsg(msg) {
+  const el = document.getElementById("sysLog");
+  const t = new Date().toLocaleTimeString("ja-JP", { hour12: false });
+  el.innerHTML = `[${t}] ${escapeHtml(msg)}<br>` + el.innerHTML;
 }
 
-async function ensureWorker() {
-  if (!worker) {
-    setLog("日本語OCRエンジンを読み込み中（初回は数秒〜十数秒かかります）...");
-    worker = await Tesseract.createWorker("jpn", 1, {
-      logger: m => {
-        if (m.status === "recognizing text") {
-          setLog(`認識中... ${Math.round((m.progress || 0) * 100)}%`);
-        }
-      }
-    });
-    // 単一行〜ブロック混在向けの設定
-    await worker.setParameters({ tessedit_pageseg_mode: Tesseract.PSM.AUTO });
-  }
-  return worker;
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
 }
 
-document.getElementById("startBtn").addEventListener("click", async () => {
+function nextDeliveryId() {
+  seqCounter += 1;
+  return `配達番号${String(seqCounter).padStart(3, "0")}`;
+}
+
+function playBeep() {
   try {
-    setLog("カメラを起動中...");
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: "environment" },
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        focusMode: { ideal: "continuous" }
-      },
-      audio: false
-    });
-    const video = document.getElementById("video");
-    video.srcObject = stream;
-    await video.play();
-    setLog(`カメラ起動OK（解像度: ${video.videoWidth}x${video.videoHeight}）`);
-  } catch (e) {
-    setLog("カメラ起動エラー: " + (e?.message || e));
-  }
-});
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = 880;
+    gain.gain.value = 0.08;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.12);
+  } catch (_) {}
+}
 
-document.getElementById("ocrBtn").addEventListener("click", async () => {
-  if (busy) return;
-  const video = document.getElementById("video");
-  if (!video.srcObject || video.readyState < 2) {
-    setLog("先に「1. カメラ起動」を押してください");
-    return;
-  }
-  busy = true;
-  try {
-    const w = video.videoWidth || 1280;
-    const h = video.videoHeight || 720;
+// 複数行テキストを「1件＝1配達」にまとめる簡易パーサ
+function parseAddressEntries(rawText) {
+  const lines = String(rawText || "")
+    .split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(Boolean);
 
-    // ガイド枠（left: 6%, width: 88%, top: 28%, height: 44%）に対応する領域を切り抜き、横幅1200pxに拡大
-    const sx = Math.round(w * 0.06);
-    const sy = Math.round(h * 0.28);
-    const sw = Math.round(w * 0.88);
-    const sh = Math.round(h * 0.44);
+  const entries = [];
+  for (const line of lines) {
+    // 郵便番号や「様/御中」を除いた形
+    const stripped = line
+      .replace(/[〒\u3012]/g, " ")
+      .replace(/\d{3}-?\d{4}/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!stripped) continue;
 
-    const outW = 1200;
-    const outH = Math.max(200, Math.round((sh / sw) * outW));
-
-    const canvas = document.getElementById("cropCanvas");
-    canvas.width = outW;
-    canvas.height = outH;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, outW, outH);
-
-    // グレースケール＋コントラスト強調
-    if (document.getElementById("highContrast").checked) {
-      const img = ctx.getImageData(0, 0, outW, outH);
-      const d = img.data;
-      const contrast = 1.6; // 1.0が標準
-      const intercept = 128 * (1 - contrast);
-      for (let i = 0; i < d.length; i += 4) {
-        const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-        const v = Math.max(0, Math.min(255, gray * contrast + intercept));
-        d[i] = d[i + 1] = d[i + 2] = v;
-      }
-      ctx.putImageData(img, 0, 0);
+    // すでに直前の行に住所があり、今の行が番地数字を含まず短い場合は「氏名行」とみなしてスキップ（別件扱いしたい場合は1行に書くか空行で分ける）
+    const hasAddressToken = /(都|道|府|県|市|区|町|村|丁目|番地|号|\d+[-−ー]\d+)/.test(stripped);
+    if (!hasAddressToken && entries.length > 0 && stripped.length <= 8) {
+      continue;
     }
 
-    const wk = await ensureWorker();
-    const { data } = await wk.recognize(canvas);
-    const text = String(data?.text || "").trim();
-    document.getElementById("resultText").value = text;
-    setLog(text ? `認識完了（${text.replace(/\n+/g, " ").length}文字）` : "文字が検出されませんでした。枠内の文字サイズや明るさを調整してください。");
-  } catch (e) {
-    setLog("OCRエラー: " + (e?.message || e));
-  } finally {
-    busy = false;
+    // 同一行内の末尾に氏名らしき要素があれば除去
+    const parts = stripped.split(" ");
+    if (parts.length >= 2) {
+      const last = parts[parts.length - 1];
+      if (/(様|御中)$/.test(last) || (!/\d/.test(last) && last.length <= 6)) {
+        parts.pop();
+      }
+    }
+    const addressOnly = parts.join(" ").trim();
+    if (addressOnly) entries.push(addressOnly);
   }
-});
-</script>
-</body>
-</html>
+  return entries;
+}
+
+// 国土地理院 住所検索APIで座標変換＆精度判定
+async function geocodeJapaneseAddress(address) {
+  if (!address) return { ok: false, accuracy: "UNKNOWN", reason: "住所が空です" };
+  try {
+    const url = `https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(address)}`;
+    const res = await fetch(url);
+    if (!res.ok) return { ok: false, accuracy: "UNKNOWN", reason: `API応答エラー(${res.status})` };
+    const list = await res.json();
+    if (!Array.isArray(list) || list.length === 0) {
+      return { ok: false, accuracy: "UNKNOWN", reason: "該当住所が見つかりません" };
+    }
+    const top = list[0];
+    const [lng, lat] = top.geometry?.coordinates || [];
+    const title = String(top.properties?.title || "");
+    if (typeof lat !== "number" || typeof lng !== "number") {
+      return { ok: false, accuracy: "UNKNOWN", reason: "座標が取得できません" };
+    }
+
+    const hasBlockInInput = /(\d+丁目|\d+[-−ー]\d+|\d+番地|\d+号)/.test(address);
+    const hasBlockInResult = /(\d+丁目|\d+[-−ー]\d+|\d+番地|\d+号)/.test(title);
+    if (hasBlockInInput && hasBlockInResult) {
+      return { ok: true, lat, lng, accuracy: "EXACT", reason: "番地レベルまで特定" };
+    }
+    return { ok: true, lat, lng, accuracy: "TOWN", reason: "町丁目レベルまで特定（番地要確認）" };
+  } catch (_) {
+    return { ok: false, accuracy: "UNKNOWN", reason: "通信または変換エラー" };
+  }
+}
+
+async function processRawInput(rawText) {
+  const entries = parseAddressEntries(rawText);
+  if (entries.length === 0) {
+    logMsg("取り込める住所が見つかりませんでした");
+    return;
+  }
+
+  for (const addr of entries) {
+    const geo = await geocodeJapaneseAddress(addr);
+    const id = nextDeliveryId();
+    const needsReview = !geo.ok || geo.accuracy !== "EXACT";
+
+    // 住所・氏名・郵便番号はここで破棄し、保持対象のみ格納
+    const record = {
+      id,
+      lat: geo.ok ? geo.lat : null,
+      lng: geo.ok ? geo.lng : null,
+      orderSeq: deliveries.length + 1,
+      status: "PENDING",
+      accuracy: geo.accuracy,
+      needsReview
+    };
+
+    if (needsReview) {
+      tempReviewMeta.set(id, { reason: geo.reason });
+    }
+    deliveries.push(record);
+    logMsg(`${id} を登録（精度: ${geo.accuracy} / 個人情報は未保持）`);
+  }
+
+  // 入力欄のテキストをクリアして破棄
+  document.getElementById("pasteInput").value = "";
+  playBeep();
+  renderTables();
+}
+
+function confirmReviewItem(id) {
+  const item = deliveries.find(d => d.id === id);
+  if (!item) return;
+  if (item.lat == null || item.lng == null) {
+    item.lat = 35.698262;
+    item.lng = 139.413699;
+    item.accuracy = "TOWN";
+  }
+  item.needsReview = false;
+  tempReviewMeta.delete(id);
